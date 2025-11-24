@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -57,6 +57,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
          <div class="sidebar-header text-center mb-4">
@@ -71,41 +72,34 @@
     </div>
     </div>
 
-    <div class="content">
-        @if (session('success'))
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session('success') }}',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            </script>
-        @endif
+<!-- Toggle Button -->
+<button id="toggle" class="toggle-btn">
+  <i class="bi bi-list"></i>
+</button>
 
-        @if (session('info'))
-            <script>
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Informasi',
-                    text: '{{ session('info') }}',
-                    showConfirmButton: true
-                });
-            </script>
-        @endif
 
-        @if (session('error'))
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '{{ session('error') }}'
-                });
-            </script>
-        @endif
+<!-- ======================= CONTENT ======================= -->
+<div class="content">
+  @if(session('success'))
+    <div class="alert alert-success shadow-sm">{{ session('success') }}</div>
+  @endif
 
-        @yield('content')
-    </div>
+  @yield('content')
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('toggle');
+
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+  });
+</script>
+
 </body>
 </html>
+

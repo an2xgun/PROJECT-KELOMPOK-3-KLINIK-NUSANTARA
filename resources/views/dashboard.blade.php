@@ -1,67 +1,63 @@
 @extends('layout')
 
 @section('content')
-<div class="container-fluid">
-    <h3 class="mb-4">📊 Dashboard</h3>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 text-center border-0 rounded-4" style="background-color: #61154ea1; color:white;">
-                <h5>Total Pasien</h5>
-                <h2>{{ $total }}</h2>
-                <i class="bi bi-people-fill fs-3"></i>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 text-center border-0 rounded-4" style="background-color: #2563eb; color:white;">
-                <h5>Laki-laki</h5>
-                <h2>{{ $laki }}</h2>
-                <i class="bi bi-gender-male fs-3"></i>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-4 text-center border-0 rounded-4" style="background-color: #ec4899; color:white;">
-                <h5>Perempuan</h5>
-                <h2>{{ $perempuan }}</h2>
-                <i class="bi bi-gender-female fs-3"></i>
-            </div>
+<h3 class="fw-bold mb-4">Dashboard</h3>
+
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <div class="card-stat" style="background:#61154e;">
+            <h6>Total Pasien</h6>
+            <h2>{{ $total_pasien }}</h2>
+            <i class="bi bi-people-fill fs-3"></i>
         </div>
     </div>
 
-    <div class="card shadow-sm mt-5 border-0 rounded-4 p-4 text-center">
-        <h5 class="mb-3">📈 Statistik Jenis Kelamin</h5>
-        <div style="max-width: 400px; margin: 0 auto;">  <!-- Ukuran grafik dibatasi -->
-            <canvas id="genderChart" width="300" height="300"></canvas>
+    <div class="col-md-3">
+        <div class="card-stat" style="background:#2563eb;">
+            <h6>Menunggu</h6>
+            <h2>{{ $menunggu }}</h2>
+            <i class="bi bi-hourglass-split fs-3"></i>
         </div>
     </div>
+
+    <div class="col-md-3">
+        <div class="card-stat" style="background:#9333ea;">
+            <h6>Sedang Dilayani</h6>
+            <h2>{{ $sedang_dilayani }}</h2>
+            <i class="bi bi-person-workspace fs-3"></i>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-stat" style="background:#16a34a;">
+            <h6>Selesai</h6>
+            <h2>{{ $selesai }}</h2>
+            <i class="bi bi-check-circle-fill fs-3"></i>
+        </div>
+    </div>
+
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('genderChart');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Laki-laki', 'Perempuan'],
-            datasets: [{
-                data: [{{ $laki }}, {{ $perempuan }}],
-                backgroundColor: ['#3b82f6', '#ec4899'],
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' },
-                title: {
-                    display: true,
-                    text: 'Perbandingan Jenis Kelamin Pasien',
-                    font: { size: 14 }
-                }
-            }
-        }
-    });
-</script>
+<hr class="my-5">
+
+<h4 class="fw-bold mb-3">Statistik Berdasarkan Poliklinik</h4>
+
+<div class="row g-4">
+
+    @foreach ($statistik_poli as $poli)
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h5>{{ $poli->nama }}</h5>
+                <p class="mb-1">Total: <strong>{{ $poli->total }}</strong></p>
+                <p class="mb-1 text-warning">Menunggu: <strong>{{ $poli->menunggu }}</strong></p>
+                <p class="mb-1 text-primary">Dilayani: <strong>{{ $poli->sedang_dilayani }}</strong></p>
+                <p class="mb-0 text-success">Selesai: <strong>{{ $poli->selesai }}</strong></p>
+            </div>
+        </div>
+    @endforeach
+
+</div>
+
 @endsection
