@@ -4,128 +4,84 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pasien;
+use App\Models\Poliklinik;
+use Carbon\Carbon;
 
 class PasienController extends Controller
 {
-    /**
-     * 🔹 Tampilkan semua pasien (Data Master)
-     */
     public function index()
     {
-        $pasien = Pasien::all();
-        return view('data_master', [
-            'title' => 'Data Master Pasien',
-            'pasien' => $pasien
+        return view('pasien.index', [
+            'title' => 'Data Pasien',
+            'pasien' => Pasien::orderBy('id','DESC')->paginate(20)
         ]);
     }
 
-    /**
-     * 🔹 Form Pendaftaran Pasien Baru
-     */
     public function create()
     {
-        return view('pendaftaran.pasien_baru', [
-            'title' => 'Pendaftaran Pasien Baru'
+        // generate nomor rekam medis otomatis
+        $last = Pasien::orderBy('id','DESC')->first();
+        $no_rm = $last ? $last->id + 1 : 1;
+        $no_rm = str_pad($no_rm, 6, '0', STR_PAD_LEFT);
+
+        return view('pendaftaran.create', [
+            'title' => 'Pasien Baru',
+            'poli'  => Poliklinik::all(),
+            'no_rm' => $no_rm
         ]);
     }
 
-    /**
-     * 🔹 Simpan Pasien Baru ke Database
-     */
-    public function store(Request $request)
+    public function store(Request $r)
     {
-        $validated = $request->validate([
-            'nik' => 'required|unique:pasiens,nik',
-            'no_rm' => 'required|unique:pasiens,no_rm',
-            'nama' => 'required',
-            'alamat' => 'required',
-            'jenis_kelamin' => 'required',
-            'tanggal_lahir' => 'required|date',
-            'no_telepon' => 'required'
-        ]);
+        // hitung umur otomatis
+        $tgl = Carbon::parse($r->tanggal_lahir);
+        $now = Carbon::now();
 
-        Pasien::create($validated);
+        $umur_tahun = $tgl->diffInYears($now);
+        $umur_bulan = $tgl->copy()->addYears($umur_tahun)->diffInMonths($now);
+        $umur_hari  = $tgl->copy()->addYears($umur_tahun)->addMonths($umur_bulan)->diffInDays($now);
 
-        return redirect()->route('data.master')->with('success', '✅ Data pasien baru berhasil disimpan!');
+        $data = $r->all();
+        $data['umur_tahun'] = $umur_tahun;
+        $data['umur_bulan'] = $umur_bulan;
+        $data['umur_hari']  = $umur_hari;
+        $data['tanggal_kunjungan'] = now();
+
+        Pasien::create($data);
+
+        return redirect()->route('pasien.index')->with('success', 'Pasien berhasil ditambahkan');
     }
 
-    /**
-     * 🔹 Tampilkan Form Pencarian Pasien Lama
-     */
-    public function searchForm()
-    {
-        return view('pendaftaran.pasien_lama', [
-            'title' => 'Cari Pasien Lama',
-            'hasil' => null
-        ]);
-    }
-
-    /**
-     * 🔹 Lakukan Pencarian Pasien Lama
-     */
-    public function search(Request $request)
-    {
-        $keyword = $request->keyword;
-
-        $hasil = Pasien::where('nik', 'like', "%$keyword%")
-            ->orWhere('nama', 'like', "%$keyword%")
-            ->orWhere('no_rm', 'like', "%$keyword%")
-            ->get();
-
-        if ($hasil->isEmpty()) {
-            // Jika tidak ditemukan, arahkan ke form pasien baru
-            return redirect()->route('pasien.baru')
-                ->with('info', 'Pasien tidak ditemukan. Silakan daftarkan pasien baru.');
-        }
-
-        return view('pendaftaran.pasien_lama', [
-            'title' => 'Hasil Pencarian Pasien Lama',
-            'hasil' => $hasil
-        ]);
-    }
-
-    /**
-     * 🔹 Form Edit Pasien
-     */
     public function edit($id)
     {
-        $pasien = Pasien::findOrFail($id);
-        return view('edit_pasien', [
-            'title' => 'Edit Data Pasien',
-            'pasien' => $pasien
+        return view('pasien.edit', [
+            'title'  => 'Edit Pasien',
+            'pasien' => Pasien::findOrFail($id),
+            'poli'   => Poliklinik::all()
         ]);
     }
 
-    /**
-     * 🔹 Simpan Perubahan Edit ke Database
-     */
-    public function update(Request $request, $id)
+    public function update(Request $r, $id)
     {
-        $pasien = Pasien::findOrFail($id);
+        // update penghitungan umur jika tanggal lahir diubah
+        $tgl = Carbon::parse($r->tanggal_lahir);
+        $now = Carbon::now();
 
-        $validated = $request->validate([
-            'nik' => 'required|unique:pasiens,nik,' . $id,
-            'no_rm' => 'required|unique:pasiens,no_rm,' . $id,
-            'nama' => 'required',
-            'alamat' => 'required',
-            'jenis_kelamin' => 'required',
-            'tanggal_lahir' => 'required|date',
-            'no_telepon' => 'required'
-        ]);
+        $r['umur_tahun'] = $tgl->diffInYears($now);
+        $r['umur_bulan'] = $tgl->copy()->addYears($r['umur_tahun'])->diffInMonths($now);
+        $r['umur_hari']  = $tgl->copy()
+                              ->addYears($r['umur_tahun'])
+                              ->addMonths($r['umur_bulan'])
+                              ->diffInDays($now);
 
-        $pasien->update($validated);
+        Pasien::findOrFail($id)->update($r->all());
 
-        return redirect()->route('data.master')->with('success', '✅ Data pasien berhasil diperbarui!');
+        return redirect()->route('pasien.index')->with('success', 'Data pasien diupdate');
     }
 
-    /**
-     * 🔹 Hapus Data Pasien
-     */
     public function destroy($id)
     {
-        $pasien = Pasien::findOrFail($id);
-        $pasien->delete();
-
-        return redirect()->route('data.master')->with('success', '🗑️ Data pasien berhasil dihapus!');
+        Pasien::findOrFail($id)->delete();
+        return back()->with('success', 'Data pasien dihapus');
     }
 }

@@ -1,111 +1,259 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏥 Sistem Pendaftaran Pasien</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #3b8cf681, #3382ea25);
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            min-height: 100vh;
-        }
-        .sidebar {
-            width: 240px;
-            background-color: #3b8cf694;
-            color: #995685ff;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem 1rem;
-            position: fixed;
-            height: 100vh;
-        }
-        .sidebar h2 {
-            font-weight: 600;
-            font-size: 1.4rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar a {
-            color: #e1cbd5ff;
-            text-decoration: none;
-            padding: 10px 15px;
-            display: block;
-            border-radius: 10px;
-            transition: all 0.2s;
-            margin-bottom: 0.5rem;
-        }
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #3382ea59;
-            color: #fff;
-        }
-        .content {
-            margin-left: 260px;
-            padding: 2rem;
-            width: 100%;
-        }
-        .btn-primary {
-            background-color: #3382ea59;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #3382ea59;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ $title ?? 'Klinik Anggun' }}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body{
+      font-family:Poppins,system-ui,Arial;
+      background:#f5f5f5;
+      overflow-x:hidden;
+    }
+
+    .sidebar{
+      width:240px;
+      position:fixed;
+      left:0; top:0; bottom:0;
+      background:linear-gradient(180deg,#4f2c4a,#2b6b9a);
+      color:#fff; padding:20px;
+      transition:all 0.3s ease;
+      overflow-y:auto;
+      box-shadow:2px 0 10px rgba(0,0,0,0.2);
+    }
+
+    .sidebar.collapsed{
+      width:70px;
+      padding:20px 10px;
+    }
+
+    .sidebar a{
+      color:rgba(255,255,255,0.9);
+      text-decoration:none;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:10px;
+      white-space:nowrap;
+      transition:all .2s;
+      font-size:15px;
+    }
+
+    .sidebar a:hover{
+      background:rgba(255,255,255,0.20);
+      box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .sidebar a.active{
+      background:rgba(255,255,255,0.25);
+    }
+
+    .sidebar a span{ transition:opacity .2s; }
+    .sidebar.collapsed a span{ opacity:0; width:0; }
+
+    .logo-circle{
+      width:60px;height:60px;
+      border-radius:50%;
+      object-fit:cover;
+      border:3px solid rgba(255,255,255,0.25);
+      box-shadow:0 3px 10px rgba(0,0,0,0.3);
+      transition:all .3s;
+    }
+
+    .sidebar.collapsed .logo-circle{
+      width:40px;height:40px;
+    }
+
+    .sidebar-title{
+      font-size:18px;
+      margin-top:5px;
+      font-weight:600;
+      transition:all .3s;
+    }
+
+    .sidebar.collapsed .sidebar-title{
+      opacity:0; height:0;
+    }
+
+    .content{
+      margin-left:260px;
+      padding:28px;
+      transition:all 0.3s;
+    }
+
+    .collapsed + .content{
+      margin-left:90px;
+    }
+
+    .toggle-btn{
+      position:fixed;
+      top:15px;
+      left:250px;
+      z-index:999;
+      background:#ffffff;
+      border-radius:8px;
+      padding:7px 11px;
+      border:1px solid #ddd;
+      cursor:pointer;
+      transition:all .3s;
+      box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.collapsed + .toggle-btn{
+      left:80px;
+    }
+
+    .collapse a{
+      padding-left:25px;
+      font-size:14px;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="sidebar">
-         <div class="sidebar-header text-center mb-4">
-            <img src="https://i.pinimg.com/736x/58/c2/53/58c253f9dbde6c2ed7f74eedc4ddc7a2.jpg" alt="Logo Klinik" width="80" class="rounded-circle mb-2">
-        <h2>🩺 Pendaftaran Klinik </h2>
-        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">🏠 Dashboard</a>
-        <a href="{{ route('data.master') }}" class="{{ request()->routeIs('data.master') ? 'active' : '' }}">📋 Data Master</a>
-        <a href="{{ route('pasien.baru') }}" class="{{ request()->routeIs('pasien.baru') ? 'active' : '' }}">➕ Pasien Baru</a>
-        <a href="{{ route('pasien.lama') }}" class="{{ request()->routeIs('pasien.lama') ? 'active' : '' }}">🔍 Pasien Lama</a>
-        <hr style="border-color: #694758ff;">
-        <a href="{{ route('logout') }}">🚪 Logout</a>
-    </div>
-    </div>
 
-    <div class="content">
-        @if (session('success'))
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session('success') }}',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            </script>
-        @endif
+<div id="sidebar" class="sidebar">
 
-        @if (session('info'))
-            <script>
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Informasi',
-                    text: '{{ session('info') }}',
-                    showConfirmButton: true
-                });
-            </script>
-        @endif
+  <!-- LOGO -->
+  <div class="text-center mb-3">
+    <img src="/logo.png" class="logo-circle mb-2">
+    <div class="sidebar-title text-center">Klinik Anggun</div>
+  </div>
 
-        @if (session('error'))
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '{{ session('error') }}'
-                });
-            </script>
-        @endif
+  <!-- DASHBOARD -->
+  <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+    <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+  </a>
 
-        @yield('content')
-    </div>
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== PENDAFTARAN ====================== -->
+  <a data-bs-toggle="collapse" href="#menuPendaftaran" role="button">
+    <i class="bi bi-journal-medical"></i><span>Pendaftaran</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuPendaftaran">
+    <a href="{{ route('pendaftaran.create') }}" class="d-block mb-1">
+      <i class="bi bi-search"></i> <span>Cari Pasien Lama</span>
+    </a>
+    <a href="{{ route('pasien.create') }}" class="d-block mb-1">
+      <i class="bi bi-person-plus"></i> <span>Pasien Baru</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== POLIKLINIK ====================== -->
+  <a data-bs-toggle="collapse" href="#menuPoliklinik" role="button">
+    <i class="bi bi-hospital"></i><span>Poliklinik</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuPoliklinik">
+    <a href="{{ route('poliklinik.poli_umum') }}" class="d-block mb-1">
+      <i class="bi bi-clipboard2-pulse"></i> <span>Poli Umum</span>
+    </a>
+    <a href="{{ route('poliklinik.poli_gigi') }}" class="d-block mb-1">
+      <i class="bi bi-emoji-smile"></i> <span>Poli Gigi</span>
+    </a>
+    <a href="{{ route('poliklinik.poli_kandungan') }}" class="d-block mb-1">
+      <i class="bi bi-gender-female"></i> <span>Poli Kandungan</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== MASTER DATA ====================== -->
+  <a data-bs-toggle="collapse" href="#menuMaster" role="button">
+    <i class="bi bi-grid"></i><span>Master Data</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuMaster">
+    <a href="{{ route('master.jadwal_dokter') }}" class="d-block mb-1">
+      <i class="bi bi-person-vcard"></i> <span>Dokter</span>
+    </a>
+
+    <a href="{{ route('master.jadwal_poli') }}" class="d-block mb-1">
+      <i class="bi bi-calendar2-week"></i> <span>Jadwal Dokter</span>
+    </a>
+
+    <a href="{{ route('master.data_tindakan') }}" class="d-block mb-1">
+      <i class="bi bi-tools"></i> <span>Tindakan</span>
+    </a>
+
+    <a href="{{ route('master.data_diagnosa') }}" class="d-block mb-1">
+      <i class="bi bi-journal-text"></i> <span>Diagnosa</span>
+    </a>
+
+    <a href="{{ route('pasien.index') }}" class="d-block mb-1">
+      <i class="bi bi-people"></i> <span>Data Pasien</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== GUDANG OBAT ====================== -->
+  <a data-bs-toggle="collapse" href="#menuGudangObat" role="button">
+    <i class="bi bi-box-seam"></i><span>Gudang Obat</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuGudangObat">
+    <a href="{{ route('gudang_obat.apotik') }}" class="d-block mb-1">
+      <i class="bi bi-capsule"></i> <span>Apotik</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.apotik_retail') }}" class="d-block mb-1">
+      <i class="bi bi-bag"></i> <span>Apotik Retail</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.farmasi') }}" class="d-block mb-1">
+      <i class="bi bi-prescription2"></i> <span>Farmasi</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.master_obat') }}" class="d-block mb-1">
+      <i class="bi bi-archive"></i> <span>Master Obat</span>
+    </a>
+  </div>
+
+</div>
+
+<!-- Toggle Button -->
+<button id="toggle" class="toggle-btn">
+  <i class="bi bi-list"></i>
+</button>
+
+
+<!-- ======================= CONTENT ======================= -->
+<div class="content">
+  @if(session('success'))
+    <div class="alert alert-success shadow-sm">{{ session('success') }}</div>
+  @endif
+
+  @yield('content')
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('toggle');
+
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+  });
+</script>
+
 </body>
 </html>
