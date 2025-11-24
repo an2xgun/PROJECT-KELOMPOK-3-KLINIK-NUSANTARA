@@ -18,39 +18,45 @@ use App\Http\Controllers\GudangObatController;
 // LOGIN
 // -------------------------
 Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-// -------------------------
 // REDIRECT ROOT
-// -------------------------
 Route::get('/', fn() => redirect()->route('dashboard'));
 
-
-// -------------------------
 // DASHBOARD
-// -------------------------
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
-
-
 // -------------------------
 // PENDAFTARAN
 // -------------------------
 Route::prefix('pendaftaran')->group(function () {
-    Route::get('/create', [PendaftaranController::class, 'create'])
-        ->name('pendaftaran.create');
+    Route::get('/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
 
-    Route::get('/list', [PendaftaranController::class, 'index'])
-        ->name('pendaftaran.list');
+    Route::get('/list', [PendaftaranController::class, 'index'])->name('pendaftaran.list');
 });
 
 
 // -------------------------
 // PASIEN
 // -------------------------
-Route::resource('pasien', PasienController::class);
+// ====================== PASIEN ======================
+Route::prefix('pasien')->group(function () {
+
+    Route::get('/', [PasienController::class, 'index'])->name('pasien.index');
+
+    Route::get('/create', [PasienController::class, 'create'])->name('pasien.create');
+    Route::post('/store', [PasienController::class, 'store'])->name('pasien.store');
+
+    Route::get('/edit/{id}', [PasienController::class, 'edit'])->name('pasien.edit');
+    Route::put('/update/{id}', [PasienController::class, 'update'])->name('pasien.update');
+
+    Route::delete('/delete/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
+
+    // API pencarian No RM untuk pendaftaran
+    Route::get('/get/{no_rm}', [PasienController::class, 'getByNoRM'])->name('pasien.getByNoRM');
+});
+
 
 
 // -------------------------

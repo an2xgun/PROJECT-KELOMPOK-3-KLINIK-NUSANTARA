@@ -5,8 +5,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pasien extends Model
 {
-    use HasFactory;
+protected $table = 'pasien';
+
     protected $fillable = [
+        'no_rm',
         'no_rm_lama',
         'nama',
         'nik',
@@ -22,16 +24,16 @@ class Pasien extends Model
         'gol_darah',
         'alamat',
         'email',
+        'no_telp',
         'pekerjaan',
         'wilayah',
         'desa',
         'rujukan_dari',
         'ket_rujukan',
         'tanggal_kunjungan',
-        'kode_rm_terakhir',
         'tujuan',
         'jenis_kunjungan',
-        'jenis_pembayaran'
+        'jenis_pembayaran',
     ];
 
     public function pendaftaran()

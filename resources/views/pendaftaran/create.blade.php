@@ -1,6 +1,8 @@
 @extends('layout')
 @section('content')
 <h3>Pendaftaran Pasien</h3>
+<form action="{{ route('pasien.store') }}" method="POST">
+@csrf
 
 {{-- Pencarian pasien lama (AJAX live search) --}}
 <div class="mb-3">
@@ -11,7 +13,7 @@
     </div>
     <div id="searchResult" class="mt-2"></div>
 </div>
-
+</form>
 <hr>
 
 <form id="formPendaftaran" action="{{ route('pasien.index') }}" method="POST">

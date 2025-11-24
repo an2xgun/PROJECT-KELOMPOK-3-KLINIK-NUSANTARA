@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,23 +8,30 @@ use Carbon\Carbon;
 
 class PasienController extends Controller
 {
-    public function index()
-    {
-        return view('pasien.index', [
-            'title' => 'Data Pasien',
-            'pasien' => Pasien::orderBy('id','DESC')->paginate(20)
-        ]);
+   
+   public function index(Request $r)
+{
+    $query = Pasien::orderBy('id', 'DESC');
+
+    if ($r->q) {
+        $query->where('nama', 'like', '%'.$r->q.'%')
+              ->orWhere('no_rm', 'like', '%'.$r->q.'%');
     }
+
+    $data = $query->paginate(15);
+
+    return view('pasien.index', compact('data'));
+}
+
+
 
     public function create()
     {
-        // generate nomor rekam medis otomatis
         $last = Pasien::orderBy('id','DESC')->first();
-        $no_rm = $last ? $last->id + 1 : 1;
-        $no_rm = str_pad($no_rm, 6, '0', STR_PAD_LEFT);
+        $no_rm = $last ? str_pad($last->id + 1, 6, '0', STR_PAD_LEFT) : '000001';
 
-        return view('pendaftaran.create', [
-            'title' => 'Pasien Baru',
+        return view('pasien.create', [
+            'title' => 'Data Pasien Baru',
             'poli'  => Poliklinik::all(),
             'no_rm' => $no_rm
         ]);
@@ -33,23 +39,17 @@ class PasienController extends Controller
 
     public function store(Request $r)
     {
-        // hitung umur otomatis
+        // Hitung umur
         $tgl = Carbon::parse($r->tanggal_lahir);
         $now = Carbon::now();
 
-        $umur_tahun = $tgl->diffInYears($now);
-        $umur_bulan = $tgl->copy()->addYears($umur_tahun)->diffInMonths($now);
-        $umur_hari  = $tgl->copy()->addYears($umur_tahun)->addMonths($umur_bulan)->diffInDays($now);
+        $r['umur_tahun'] = $tgl->diffInYears($now);
+        $r['umur_bulan'] = $tgl->diffInMonths($now) % 12;
+        $r['umur_hari']  = $tgl->diffInDays($now) % 30;
 
-        $data = $r->all();
-        $data['umur_tahun'] = $umur_tahun;
-        $data['umur_bulan'] = $umur_bulan;
-        $data['umur_hari']  = $umur_hari;
-        $data['tanggal_kunjungan'] = now();
+        Pasien::create($r->all());
 
-        Pasien::create($data);
-
-        return redirect()->route('pasien.index')->with('success', 'Pasien berhasil ditambahkan');
+        return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -57,22 +57,19 @@ class PasienController extends Controller
         return view('pasien.edit', [
             'title'  => 'Edit Pasien',
             'pasien' => Pasien::findOrFail($id),
-            'poli'   => Poliklinik::all()
+            'poli'   => Poliklinik::all(),
         ]);
     }
 
     public function update(Request $r, $id)
     {
-        // update penghitungan umur jika tanggal lahir diubah
+        // Recalculate umur
         $tgl = Carbon::parse($r->tanggal_lahir);
         $now = Carbon::now();
 
         $r['umur_tahun'] = $tgl->diffInYears($now);
-        $r['umur_bulan'] = $tgl->copy()->addYears($r['umur_tahun'])->diffInMonths($now);
-        $r['umur_hari']  = $tgl->copy()
-                              ->addYears($r['umur_tahun'])
-                              ->addMonths($r['umur_bulan'])
-                              ->diffInDays($now);
+        $r['umur_bulan'] = $tgl->diffInMonths($now) % 12;
+        $r['umur_hari']  = $tgl->diffInDays($now) % 30;
 
         Pasien::findOrFail($id)->update($r->all());
 
@@ -83,5 +80,12 @@ class PasienController extends Controller
     {
         Pasien::findOrFail($id)->delete();
         return back()->with('success', 'Data pasien dihapus');
+    }
+
+    // AJAX Search untuk Pendaftaran
+    public function getByNoRM($no_rm)
+    {
+        $pasien = Pasien::where('no_rm', $no_rm)->first();
+        return response()->json($pasien);
     }
 }
