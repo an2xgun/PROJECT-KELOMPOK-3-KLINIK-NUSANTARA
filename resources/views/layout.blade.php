@@ -64,7 +64,7 @@
             <img src="https://i.pinimg.com/736x/58/c2/53/58c253f9dbde6c2ed7f74eedc4ddc7a2.jpg" alt="Logo Klinik" width="80" class="rounded-circle mb-2">
         <h2>🩺 Pendaftaran Klinik </h2>
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">🏠 Dashboard</a>
-        <a href="{{ route('data.master') }}" class="{{ request()->routeIs('data.master') ? 'active' : '' }}">📋 Data Master</a>
+        <a href="{{ route('master') }}" class="{{ request()->routeIs('master') ? 'active' : '' }}">📋 Data Master</a>
         <a href="{{ route('pasien.baru') }}" class="{{ request()->routeIs('pasien.baru') ? 'active' : '' }}">➕ Pasien Baru</a>
         <a href="{{ route('pasien.lama') }}" class="{{ request()->routeIs('pasien.lama') ? 'active' : '' }}">🔍 Pasien Lama</a>
         <hr style="border-color: #694758ff;">
@@ -102,4 +102,3 @@
 
 </body>
 </html>
-
