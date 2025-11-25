@@ -149,18 +149,118 @@
 </head>
 
 <body>
-    <div class="sidebar">
-         <div class="sidebar-header text-center mb-4">
-            <img src="https://i.pinimg.com/736x/58/c2/53/58c253f9dbde6c2ed7f74eedc4ddc7a2.jpg" alt="Logo Klinik" width="80" class="rounded-circle mb-2">
-        <h2>🩺 Pendaftaran Klinik </h2>
-        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">🏠 Dashboard</a>
-        <a href="{{ route('data.master') }}" class="{{ request()->routeIs('data.master') ? 'active' : '' }}">📋 Data Master</a>
-        <a href="{{ route('pasien.baru') }}" class="{{ request()->routeIs('pasien.baru') ? 'active' : '' }}">➕ Pasien Baru</a>
-        <a href="{{ route('pasien.lama') }}" class="{{ request()->routeIs('pasien.lama') ? 'active' : '' }}">🔍 Pasien Lama</a>
-        <hr style="border-color: #694758ff;">
-        <a href="{{ route('logout') }}">🚪 Logout</a>
-    </div>
-    </div>
+
+<div id="sidebar" class="sidebar">
+
+  <!-- LOGO -->
+  <div class="text-center mb-3">
+    <img src="https://i.pinimg.com/736x/cd/0a/f4/cd0af474c82e8359413ce2d038a045ea.jpg" class="logo-circle mb-2">
+    <div class="sidebar-title text-center">Klinik Nusantara</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+    <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+  </a>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== PENDAFTARAN ====================== -->
+  <a data-bs-toggle="collapse" href="#menuPendaftaran" role="button">
+    <i class="bi bi-journal-medical"></i><span>Pendaftaran</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuPendaftaran">
+    <a href="{{ route('pendaftaran.create') }}" class="d-block mb-1">
+      <i class="bi bi-search"></i> <span>Cari Pasien Lama</span>
+    </a>
+    <a href="{{ route('pasien.create') }}" class="d-block mb-1">
+      <i class="bi bi-person-plus"></i> <span>Pasien Baru</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== POLIKLINIK ====================== -->
+  <a data-bs-toggle="collapse" href="#menuPoliklinik" role="button">
+    <i class="bi bi-hospital"></i><span>Poliklinik</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuPoliklinik">
+    <a href="{{ route('poliklinik.poli_umum') }}" class="d-block mb-1">
+      <i class="bi bi-clipboard2-pulse"></i> <span>Poli Umum</span>
+    </a>
+    <a href="{{ route('poliklinik.poli_gigi') }}" class="d-block mb-1">
+      <i class="bi bi-emoji-smile"></i> <span>Poli Gigi</span>
+    </a>
+    <a href="{{ route('poliklinik.poli_kandungan') }}" class="d-block mb-1">
+      <i class="bi bi-gender-female"></i> <span>Poli Kandungan</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== MASTER DATA ====================== -->
+  <a data-bs-toggle="collapse" href="#menuMaster" role="button">
+    <i class="bi bi-grid"></i><span>Master Data</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuMaster">
+    <a href="{{ route('master.jadwal_dokter') }}" class="d-block mb-1">
+      <i class="bi bi-person-vcard"></i> <span>Dokter</span>
+    </a>
+
+    <a href="{{ route('master.jadwal.index') }}" class="d-block mb-1">
+      <i class="bi bi-calendar2-week"></i> <span>Jadwal Dokter</span>
+    </a>
+
+    <a href="{{ route('master.data_tindakan') }}" class="d-block mb-1">
+      <i class="bi bi-tools"></i> <span>Tindakan</span>
+    </a>
+
+    <a href="{{ route('master.data_diagnosa.index') }}" class="d-block mb-1">
+      <i class="bi bi-journal-text"></i> <span>Diagnosa</span>
+    </a>
+
+    <a href="{{ route('pasien.index') }}" class="d-block mb-1">
+      <i class="bi bi-people"></i> <span>Data Pasien</span>
+    </a>
+
+     <a href="{{ route('poliklinik.index') }}" class="d-block mb-1">
+      <i class="bi bi-people"></i> <span>Data poliklinik</span>
+    </a>
+  </div>
+
+  <hr style="border-color: rgba(255,255,255,0.1)">
+
+
+  <!-- ====================== GUDANG OBAT ====================== -->
+  <a data-bs-toggle="collapse" href="#menuGudangObat" role="button">
+    <i class="bi bi-box-seam"></i><span>Gudang Obat</span>
+  </a>
+
+  <div class="collapse ms-4" id="menuGudangObat">
+    <a href="{{ route('gudang_obat.apotik') }}" class="d-block mb-1">
+      <i class="bi bi-capsule"></i> <span>Apotik</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.apotik_retail') }}" class="d-block mb-1">
+      <i class="bi bi-bag"></i> <span>Apotik Retail</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.farmasi') }}" class="d-block mb-1">
+      <i class="bi bi-prescription2"></i> <span>Farmasi</span>
+    </a>
+
+    <a href="{{ route('gudang_obat.master_obat') }}" class="d-block mb-1">
+      <i class="bi bi-archive"></i> <span>Master Obat</span>
+    </a>
+  </div>
+
+</div>
 
 <!-- Toggle Button -->
 <button id="toggle" class="toggle-btn">
