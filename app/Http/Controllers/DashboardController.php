@@ -20,7 +20,7 @@ class DashboardController extends Controller
             'selesai' => Pendaftaran::where('status', 'Selesai')->count(),
 
             'statistik_poli' => Poliklinik::withCount([
-                'pendaftaran as total',
+                'pendaftaran as total',/
                 'pendaftaran as menunggu' => fn($q)=>$q->where('status','Menunggu'),
                 'pendaftaran as sedang_dilayani' => fn($q)=>$q->where('status','Sedang Dilayani'),
                 'pendaftaran as selesai' => fn($q)=>$q->where('status','Selesai'),            ])->get()

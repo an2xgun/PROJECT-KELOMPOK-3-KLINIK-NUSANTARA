@@ -4,15 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMasterTindakanTable extends Migration
+class CreateDiagnosesTable extends Migration
 {
     public function up()
     {
-        Schema::create('treatments', function (Blueprint $table) {
+        Schema::create('diagnoses', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
-            $table->decimal('unit_price', 12, 2)->nullable(); // Biaya tindakan
+            $table->string('icd10')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -20,6 +20,6 @@ class CreateMasterTindakanTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('treatments');
+        Schema::dropIfExists('diagnoses');
     }
 }

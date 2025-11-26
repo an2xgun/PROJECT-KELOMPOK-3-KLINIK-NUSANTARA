@@ -8,16 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('jadwal_polis', function (Blueprint $table) {
+        Schema::create('jadwals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('poli_id');
             $table->unsignedBigInteger('dokter_id');
-            $table->string('hari');
+            $table->unsignedBigInteger('poli_id');
+            $table->string('hari'); // contoh: Senin, Selasa
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->timestamps();
 
-            // Relasi
+            // foreign key jika ingin
             $table->foreign('dokter_id')->references('id')->on('dokters')->onDelete('cascade');
             $table->foreign('poli_id')->references('id')->on('polikliniks')->onDelete('cascade');
         });
@@ -25,6 +25,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('jadwal_polis');
+        Schema::dropIfExists('jadwals');
     }
 };

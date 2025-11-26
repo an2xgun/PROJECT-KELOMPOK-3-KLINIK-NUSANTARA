@@ -4,18 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Support\Str; // <-- Tambahan penting!
 
-class Tindakan extends Model
+class Diagnoses extends Model
 {
     use HasFactory;
 
-    protected $table = 'treatments'; // Pastikan sesuai dengan nama tabel di database
+    protected $table = 'diagnoses'; // GANTI jika di DB kamu 'diagnosa'
     
     protected $fillable = [
-        'code', 'name', 'tarif', 'description'
+        'code', 'name', 'icd10', 'description'
     ];
 
+    // Jika tabel tidak punya kolom created_at & updated_at
     public $timestamps = false;
 
     // Accessor untuk ringkasan deskripsi
