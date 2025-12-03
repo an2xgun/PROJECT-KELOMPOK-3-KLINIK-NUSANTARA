@@ -1,91 +1,368 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Dokter;
 use App\Models\Pasien;
-use App\Models\Poliklinik;
+use App\Models\Rekam;
+use App\Models\Obat;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use PDO;
 
 class PasienController extends Controller
 {
-   
-   public function index(Request $r)
-{
-    $query = Pasien::orderBy('id', 'DESC');
-
-    if ($r->q) {
-        $query->where('nama', 'like', '%'.$r->q.'%')
-              ->orWhere('no_rm', 'like', '%'.$r->q.'%');
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $datapasien = Pasien::get();
+        return view('pasien', compact('datapasien'));
     }
 
-    $data = $query->paginate(15);
-
-    return view('pasien.index', compact('data'));
-}
-
-
-
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function create()
     {
-        $last = Pasien::orderBy('id','DESC')->first();
-        $no_rm = $last ? str_pad($last->id + 1, 6, '0', STR_PAD_LEFT) : '000001';
-
-        return view('pasien.create', [
-            'title' => 'Data Pasien Baru',
-            'poli'  => Poliklinik::all(),
-            'no_rm' => $no_rm
-        ]);
+        return view('pasien-form');
     }
 
-    public function store(Request $r)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
-        // Hitung umur
-        $tgl = Carbon::parse($r->tanggal_lahir);
-        $now = Carbon::now();
+        $this->validate($request, [
+            'Nama' => 'required',
+            'Alamat' => 'required',
+            'Lahir' => 'required',
+            'NIK' => 'required',
+            'Kelamin' => 'required',
+            'Telepon' => 'required',
+            'Agama' => 'required',
+            'Pendidikan' => 'required',
+            'Pekerjaan' => 'required',
+            'layanan' => 'required',
+            'RekamMedis' => 'required',
+            'doktor' => 'required',
+            'g-recaptcha-response' => 'required|captcha'
+        ],
+        [
+            'g-recaptcha-response' => [
+                'required' => 'Please verify that you are not a robot.',
+                'captcha' => 'Captcha error! try again later or contact site admin.',
+            ],
+        ],
+        );
 
-        $r['umur_tahun'] = $tgl->diffInYears($now);
-        $r['umur_bulan'] = $tgl->diffInMonths($now) % 12;
-        $r['umur_hari']  = $tgl->diffInDays($now) % 30;
+        $data = Pasien::where('nama', $request->Nama)->where('lahir', $request->Lahir)->get();
 
-        Pasien::create($r->all());
+        $nomorAntrian = 1;
+        $cekData = Rekam::whereDate('created_at', Carbon::today())->latest()->first();
+        // $cekData = Rekam::whereDate('created_at', Carbon::today())->max('nomorantrian');
+        if ($cekData) {
+            $nomorAntrian = $cekData->nomorantrian + 1;
+        }
 
-        return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil ditambahkan');
+        if (count($data) > 0) {
+            foreach ($data as $row) :
+                $Rekam = Rekam::create([
+                    'nomorantrian' => "00" . $nomorAntrian,
+                    'id_pasien' => $row->id,
+                    'layanan' => $request->layanan,
+                    'keluhan' => $request->RekamMedis,
+                    'id_dokter' => $request->doktor
+                ]);
+
+                if($Rekam->nomorantrian == '001'){
+                    $created = $Rekam->created_at;
+                    $Rekam->jadwal_kedatangan = $created->addMinute(5);
+                    $Rekam->jadwal_selesai = $created->addMinute(15);
+                    $Rekam->save();
+                }else{
+                    $created = Carbon::parse($cekData->created_at);
+                    $Rekam->jadwal_kedatangan = $created->addMinute(25);
+                    $Rekam->jadwal_selesai = $created->addMinute(35);
+                    $Rekam->save();
+                }
+                
+                return back()->with([
+                    'success' => 'Data berhasil ditambahkan',
+                    'nomorAntrian' => "00" . $nomorAntrian,
+                    'nama' => $request->Nama,
+                    'timestamps' => $Rekam->created_at->format('H:i:s'),
+                    'tanggaldaftar' => $Rekam->created_at->format('d-m-Y'),
+                    'jadwalkedatangan' => $Rekam->jadwal_kedatangan->format('H:i'),
+                    'jadwalselesai' => $Rekam->jadwal_selesai,
+                ]);
+            endforeach;
+        } else {
+            $Pasien = Pasien::create([
+                'nama' => ucwords(strtolower($request->Nama)),
+                'alamat' => $request->Alamat,
+                'lahir' => $request->Lahir,
+                'nik' => $request->NIK,
+                'kelamin' => $request->Kelamin,
+                'telepon' => $request->Telepon,
+                'agama' => $request->Agama,
+                'pendidikan' => $request->Pendidikan,
+                'pekerjaan' => $request->Pekerjaan
+            ]);
+
+            // $kode= 100000+ (integer)$Pasien -> id ;
+            // $nomer= substr($kode, 1, 5). $Pasien -> lahir -> format ('dmy');
+            // $Pasien -> kodepasien = $nomer ;
+            // $Pasien -> save();
+            $nomer = $Pasien->lahir->format('dmy');
+            $Pasien->kodepasien = $nomer;
+            $Pasien->save();
+
+            $latestpasien = Pasien::all()->last();
+
+            $rekam = Rekam::create([
+                'nomorantrian' => "00" . $nomorAntrian,
+                'id_pasien' => $latestpasien->id,
+                'layanan' => $request->layanan,
+                'keluhan' => $request->RekamMedis,
+                'id_dokter' => $request->doktor
+            ]);
+
+            if($rekam->nomorantrian == '001'){
+                $created = $rekam->created_at;
+                $rekam->jadwal_kedatangan = $created->addMinute(5);
+                $rekam->jadwal_selesai = $created->addMinute(15);
+                $rekam->save();
+            }else{
+                $created = Carbon::parse($latestpasien->created_at);
+                $rekam->jadwal_kedatangan = $created->addMinute(25);
+                $rekam->jadwal_selesai = $created->addMinute(35);
+                $rekam->save();
+            }
+
+            return back()->with([
+                'success' => 'Data berhasil ditambahkan',
+                'nomorAntrian' => "00" . $nomorAntrian,
+                'nama' => $request->Nama,
+                'timestamps' => $Pasien->created_at->format('H:i:s'),
+                'tanggaldaftar' => $Pasien->created_at->format('d-m-Y'),
+                'jadwalkedatangan' => $rekam->jadwal_kedatangan->format('H:i'),
+                'jadwalselesai' => $rekam->jadwal_selesai,
+            ]);
+        }
+
+        // return request()->all();
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Pasien  $pasien
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Pasien $pasien)
+    {
+        $pasien = Pasien::where('id', $pasien)->get();
+        return view('pasien', compact('pasien'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Pasien  $pasien
+     * @return \Illuminate\Http\Response
+     */
     public function edit($id)
     {
-        return view('pasien.edit', [
-            'title'  => 'Edit Pasien',
-            'pasien' => Pasien::findOrFail($id),
-            'poli'   => Poliklinik::all(),
+        $pasien = Pasien::findOrfail($id);
+        $rekam = Rekam::where('id_pasien', $id)->whereNotNull('diagnosa')->get();
+
+        return view('pasien-rekammedis', [
+            'pasien' => $pasien,
+            'rekam' => $rekam,
+            'dokter' => Dokter::all(),
+            'obat' => Obat::all()
         ]);
     }
 
-    public function update(Request $r, $id)
+    // public function ubah($id)
+    // {
+    //     $pasien = Pasien::findOrfail($id);
+    //     return view('pasien-form-edit', compact('pasien-rekammedis'));
+    // }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Pasien  $pasien
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
     {
-        // Recalculate umur
-        $tgl = Carbon::parse($r->tanggal_lahir);
-        $now = Carbon::now();
+        // dd($request);
+        $request->validate([
+            'Kodepasien' => 'required',
+            'Nama' => 'required',
+            'Alamat' => 'required',
+            'Lahir' => 'required',
+            'NIK' => 'required',
+            'Kelamin' => 'required',
+            'Telepon' => 'required',
+            'Agama' => 'required',
+            'Pendidikan' => 'required',
+            'Pekerjaan' => 'required'
+        ]);
 
-        $r['umur_tahun'] = $tgl->diffInYears($now);
-        $r['umur_bulan'] = $tgl->diffInMonths($now) % 12;
-        $r['umur_hari']  = $tgl->diffInDays($now) % 30;
+        $pasien = Pasien::find($id);
 
-        Pasien::findOrFail($id)->update($r->all());
+        $pasien->update([
+            'kodepasien' => $request->Kodepasien,
+            'nama' => $request->Nama,
+            'alamat' => $request->Alamat,
+            'lahir' => $request->Lahir,
+            'nIK' => $request->NIK,
+            'kelamin' => $request->Kelamin,
+            'telepon' => $request->Telepon,
+            'agama' => $request->Agama,
+            'pendidikan' => $request->Pendidikan,
+            'pekerjaan' => $request->Pekerjaan
+        ]);
 
-        return redirect()->route('pasien.index')->with('success', 'Data pasien diupdate');
+        return redirect()->route('pasien.index')->with('success', 'Data telah diubah');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Pasien  $pasien
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Pasien $pasien)
     {
-        Pasien::findOrFail($id)->delete();
-        return back()->with('success', 'Data pasien dihapus');
+        $pasien->delete();
+        $rekam = Rekam::where('id_pasien', $pasien->id);
+        $rekam->delete();
+        return redirect('/pasien')->with('success', 'Data terhapus');
     }
 
-    // AJAX Search untuk Pendaftaran
-    public function getByNoRM($no_rm)
+    public function antrianpasien()
     {
-        $pasien = Pasien::where('no_rm', $no_rm)->first();
-        return response()->json($pasien);
+        $data = Rekam::where('diagnosa', null)->get();
+        return view('antrian-pasien', [
+            'datarekam' => $data
+        ]);
+    }
+
+    public function pasienlama()
+    {
+        $data = Dokter::all();
+        return view('pasien-lama', [
+            'dokter' => $data
+        ]);
+    }
+
+    public function cekpasienlama(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                "Nama" => 'required',
+                "Lahir" => 'required',
+            ]);
+
+        $nama = $validated['Nama'];
+        $lahir = $validated['Lahir'];
+
+        $data = Pasien::where('nama', $nama)->where('lahir', $lahir)->get();
+
+        if (count($data) > 0) {
+            foreach ($data as $row) :
+                return redirect('/pasien-lama')->with([
+                    'success' => 'Data ditemukan',
+                    'nama' => $row->nama,
+                    'lahir' => $row->lahir->format('d - M(m) - Y'),
+                    'alamat' => $row->alamat,
+                    'kelamin' => $row->kelamin,
+                    'id' => $row->id
+                ]);
+            endforeach;
+        } else {
+            return redirect('/pasien-lama')->with([
+                'failed' => 'Data tidak ditemukan'
+            ]);
+        }
+    }
+
+    public function rekamstore(Request $request)
+    {
+        $validated = $request->validate([
+            'idpasien' => 'required',
+            'layanan' => 'required',
+            'keluhan' => 'required',
+            'dokter' => 'required',
+            'diagnosa' => 'required',
+            'obat' => 'required',
+            'jumlahobat' => 'required',
+            'keterangan' => 'required'
+        ]);
+
+        Rekam::create([
+            'jumlahobat' => $validated['jumlahobat'],
+            'id_pasien' => $validated['idpasien'],
+            'nomorantrian' => 0,
+            'layanan' => $validated['layanan'],
+            'keluhan' => $validated['keluhan'],
+            'id_dokter' => $validated['dokter'],
+            'diagnosa' => $validated['diagnosa'],
+            'id_obat' => $validated['obat'],
+            'keterangan' => $validated['keterangan']
+        ]);
+
+        $obat = Obat::find($validated['obat']);
+        $obat->stok = $obat->stok - $validated['jumlahobat'];
+        $obat->save();
+
+        return back()->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function updatepasien(Request $request)
+    {
+        $validated = $request->validate([
+            'idpasien' => 'required',
+            'Kodepasien' => 'required',
+            'Nama' => 'required',
+            'Alamat' => 'required',
+            'Lahir' => 'required',
+            'NIK' => 'required',
+            'Kelamin' => 'required',
+            'Telepon' => 'required',
+            'Agama' => 'required',
+            'Pendidikan' => 'required',
+            'Pekerjaan' => 'required'
+        ]);
+
+        $pasien = Pasien::find($validated['idpasien']);
+        $pasien->kodepasien = $validated['Kodepasien'];
+        $pasien->nama = $validated['Nama'];
+        $pasien->alamat = $validated['Alamat'];
+        $pasien->lahir = $validated['Lahir'];
+        $pasien->nik = $validated['NIK'];
+        $pasien->kelamin = $validated['Kelamin'];
+        $pasien->telepon = $validated['Telepon'];
+        $pasien->agama = $validated['Agama'];
+        $pasien->pendidikan = $validated['Pendidikan'];
+        $pasien->pekerjaan = $validated['Pekerjaan'];
+        $pasien->save();
+
+        return back()->with('success', 'Data Terupdate');
     }
 }

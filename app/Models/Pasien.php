@@ -1,44 +1,33 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Pasien extends Model
 {
-protected $table = 'pasien';
-
+    use HasFactory;
     protected $fillable = [
-        'no_rm',
-        'no_rm_lama',
+        'kodepasien',
         'nama',
+        'alamat',
+        'lahir',
         'nik',
-        'no_ihs',
+        'kelamin',
+        'telepon',
         'agama',
         'pendidikan',
-        'status_keluarga',
-        'tanggal_lahir',
-        'umur_tahun',
-        'umur_bulan',
-        'umur_hari',
-        'jenis_kelamin',
-        'gol_darah',
-        'alamat',
-        'email',
-        'no_telp',
-        'pekerjaan',
-        'wilayah',
-        'desa',
-        'rujukan_dari',
-        'ket_rujukan',
-        'tanggal_kunjungan',
-        'tujuan',
-        'jenis_kunjungan',
-        'jenis_pembayaran',
+        'pekerjaan'
     ];
+    protected $guarded =['id'];
 
-    public function pendaftaran()
-    {
-        return $this->hasMany(Pendaftaran::class);
+    protected $dates = ['lahir', 'created_at', 'updated_at', 'jadwal_kedatangan', 'jadwal_selesai'];
+    // public function dokters() {
+    //     return $this->hasMany(Dokter::class);
+    // }
+
+    public function rekam(){
+        return $this->hasMany(Rekam::class, 'id');
     }
 }
-

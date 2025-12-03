@@ -3,54 +3,142 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dokter;
+use App\Models\Poli;
+use App\Models\Jadwal;
 use Illuminate\Http\Request;
 
 class DokterController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        $dokter = Dokter::all();
-        return view('master.dokter.index', compact('dokter'));
+        $datadokter = Dokter::get();
+        return view('dokter', compact('datadokter'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function create()
     {
-        return view('master.dokter.create');
-    }
-
-    public function store(Request $r)
-    {
-        $r->validate([
-            'nama' => 'required',
-            'spesialis' => 'required',
+        $jadwalvariabel = Jadwal::all();
+        return view('dokter-form', [
+            'jadwalvariabel' => $jadwalvariabel,
+            'poli' => Poli::all()
         ]);
 
-        Dokter::create($r->all());
-        return redirect()->route('master.dokter.index')->with('success', 'Dokter ditambahkan');
+        
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            
+            'Nama' => 'required',
+            'Alamat' => 'required',
+            'Spesialis' => 'required',
+            'Telepon' => 'required',
+            'Jadwal' => 'required'
+
+        ]);
+
+        $Dokter= Dokter::create([
+           
+            'nama'=>ucwords(strtolower($request->Nama)),
+            'alamat'=>$request->Alamat,            
+            'id_poli'=>$request->Spesialis,            
+            'telepon'=>$request->Telepon,
+            'jadwalpraktek'=>$request->Jadwal
+
+        ]);
+     
+
+        return redirect('/dokter')->with('success','Data berhasil ditambahkan');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Dokter $dokter)
+    {
+        $dokter = Dokter::where('id', $dokter)->get();
+        return view('dokter', compact('dokter'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function edit($id)
     {
-        $d = Dokter::findOrFail($id);
-        return view('master.dokter.edit', compact('d'));
+        $jadwalvariabel = Jadwal::all();
+        $dokter = Dokter::findOrfail($id);
+        $poli = Poli::all();
+        return view('dokter-form-edit', compact('dokter','jadwalvariabel', 'poli'));
     }
 
-    public function update(Request $r, $id)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Dokter
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
     {
-        $r->validate([
-            'nama' => 'required',
-            'spesialis' => 'required',
+        // dd($request);
+        $this->validate($request, [
+            
+            'Nama' => 'required',
+            'Alamat' => 'required',
+            'Spesialis' => 'required',
+            'Telepon' => 'required',
+            'Jadwal' => 'required'
+
         ]);
 
-        $d = Dokter::findOrFail($id);
-        $d->update($r->all());
+        $dokteredit = $request->all();
+        $dokter = Dokter::find($id);
 
-        return redirect()->route('master.dokter.index')->with('success', 'Dokter diupdate');
+        $dokter->update([
+          
+            'nama'=>ucwords(strtolower($request->Nama)),
+            'alamat'=>$request->Alamat,            
+            'id_poli'=>$request->Spesialis,            
+            'telepon'=>$request->Telepon,
+            'jadwalpraktek'=>$request->Jadwal
+
+        ]);
+
+        return redirect()->route('dokter.index')->with('success', 'Data telah diubah');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     * @param  \App\Models\Dokter  $dokter
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Dokter $dokter)
     {
-        Dokter::destroy($id);
-        return back()->with('success', 'Dokter dihapus');
+        $dokter->delete();
+        return redirect()->back();
     }
 }
