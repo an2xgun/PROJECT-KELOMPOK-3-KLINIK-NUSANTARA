@@ -1,11 +1,11 @@
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav bg-gradient-info sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
         <div class="sidebar-brand-icon">
             <i class="fas fa-hospital"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">KLINIK {{ env("APP_NAME") }} </div>
+        <div class="sidebar-brand-text mx-3">KLINIK NUSANTARA </div>
     </a>
 
     <!-- Divider -->
@@ -126,8 +126,10 @@
 
     <li class="nav-item">
         <div class="sidebar-card d-none d-lg-flex">
-            <img class="sidebar-card-illustration mb-2" src="img/logo.png" alt="...">
-            <p class="text-center mb-2"><strong></strong>Klinik {{ env("APP_NAME") }}</p>
+            <img class="sidebar-card-illustration mb-2" src="https://i.pinimg.com/1200x/05/65/bf/0565bfd66594324aa6e3b0396c65c4ce.jpg"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border:2px solid white;"
+                class="me-2">
+            <p class="text-center mb-2"><strong></strong>Klinik NUSANTARA</p>
             <a class="btn btn-success btn-sm" href="/">Ke Beranda</a>
         </div>
 
@@ -143,7 +145,7 @@
     </li>
 
     <div class="sidebar-heading">
-        Powered by &copy; KLINIK {{ env("APP_NAME") }} <br>2022
+        Powered by &copy; KLINIK NUSANTARA <br>2025
     </div>
 
 </ul>

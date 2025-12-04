@@ -15,11 +15,12 @@ class IsAdmin
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request, Closure $next)
-    {
-        if(auth()->user() && auth()->user()->is_admin === 1){
-            return $next($request);
-        }
-
-        return abort(403);
+{
+    // izinkan admin (1) dan staff (0)
+    if (auth()->check() && in_array(auth()->user()->is_admin, [0, 1])) {
+        return $next($request);
     }
+
+    return abort(403);
+}
 }
