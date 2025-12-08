@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 
 class GudangObatController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // Halaman Apotik
     public function apotik()
     {

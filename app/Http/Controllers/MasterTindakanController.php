@@ -5,6 +5,11 @@ use App\Models\MasterTindakan;
 
 class MasterTindakanController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(){ $data = MasterTindakan::all(); return view('tindakan.index', compact('data')); }
     public function create(){ return view('tindakan.create'); }
     public function store(Request $r){ $r->validate(['nama'=>'required','harga'=>'required|numeric']); MasterTindakan::create($r->all()); return redirect()->route('tindakan.index')->with('success','Ditambahkan'); }
