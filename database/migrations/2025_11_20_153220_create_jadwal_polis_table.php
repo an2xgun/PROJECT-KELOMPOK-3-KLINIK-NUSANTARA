@@ -1,30 +1,21 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    public function up(): void
-    {
+return new class extends Migration {
+    public function up(): void {
         Schema::create('jadwal_polis', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('poli_id');
-            $table->unsignedBigInteger('dokter_id');
-            $table->string('hari');
+            $table->foreignId('poliklinik_id')->constrained('polikliniks')->cascadeOnDelete();
+            $table->foreignId('dokter_id')->constrained('dokters')->cascadeOnDelete();
+            $table->string('hari'); // Senin, Selasa, ...
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->timestamps();
-
-            // Relasi
-            $table->foreign('dokter_id')->references('id')->on('dokters')->onDelete('cascade');
-            $table->foreign('poli_id')->references('id')->on('polikliniks')->onDelete('cascade');
         });
     }
-
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('jadwal_polis');
     }
 };
