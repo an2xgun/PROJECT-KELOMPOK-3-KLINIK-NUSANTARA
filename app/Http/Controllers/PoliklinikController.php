@@ -1,16 +1,21 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Poliklinik;
 use Illuminate\Http\Request;
+use App\Models\Poliklinik;
+use App\Models\Pendaftaran;
 
 class PoliklinikController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
-        $poliklinik = Poliklinik::all();
-        return view('poliklinik.index', compact('poliklinik'));
+        $data = Poliklinik::all();
+        return view('poliklinik.index', compact('data'));
     }
 
     public function create()
@@ -20,38 +25,51 @@ class PoliklinikController extends Controller
 
     public function store(Request $r)
     {
-        $r->validate([
-            'nama_poli' => 'required',
-            'kode' => 'required',
+        $validated = $r->validate([
+            'name' => 'required|unique:polikliniks'
         ]);
 
-        Poliklinik::create($r->all());
-
-        return redirect()->route('poliklinik.index')->with('success', 'Poliklinik ditambahkan');
+        Poliklinik::create($validated);
+        return redirect()->route('poliklinik.index')->with('success','Poliklinik ditambahkan');
     }
 
     public function edit($id)
     {
-        $poliklinik = Poliklinik::findOrFail($id);
-        return view('poliklinik.edit', compact('poliklinik'));
+        $poli = Poliklinik::findOrFail($id);
+        return view('poliklinik.edit', compact('poli'));
     }
 
     public function update(Request $r, $id)
     {
-        $r->validate([
-            'nama_poli' => 'required',
-            'kode' => 'required',
+        $validated = $r->validate([
+            'name' => 'required|unique:polikliniks,name,'.$id
         ]);
 
-        $poliklinik = Poliklinik::findOrFail($id);
-        $poliklinik->update($r->all());
-
-        return redirect()->route('poliklinik.index')->with('success', 'Poliklinik diupdate');
+        Poliklinik::findOrFail($id)->update($validated);
+        return redirect()->route('poliklinik.index')->with('success','Poliklinik diupdate');
     }
 
     public function destroy($id)
     {
         Poliklinik::destroy($id);
-        return back()->with('success', 'Poliklinik dihapus');
+        return back()->with('success','Poliklinik dihapus');
+    }
+
+    public function umum()
+    {
+        $pendaftaran = Pendaftaran::where('poliklinik_id', 1)->with('pasien')->paginate(15);
+        return view('poliklinik.poli_umum', compact('pendaftaran'));
+    }
+
+    public function gigi()
+    {
+        $pendaftaran = Pendaftaran::where('poliklinik_id', 2)->with('pasien')->paginate(15);
+        return view('poliklinik.poli_gigi', compact('pendaftaran'));
+    }
+
+    public function kandungan()
+    {
+        $pendaftaran = Pendaftaran::where('poliklinik_id', 3)->with('pasien')->paginate(15);
+        return view('poliklinik.poli_kandungan', compact('pendaftaran'));
     }
 }
