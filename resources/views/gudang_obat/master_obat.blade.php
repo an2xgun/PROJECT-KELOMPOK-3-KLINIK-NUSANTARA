@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layout')
 
 @section('content')
 <h3>📦 Master Data Obat</h3>
@@ -17,7 +17,7 @@
     </thead>
     @foreach($obat as $row)
     <tr>
-        <td>{{ $row->nama_obat }}</td>
+        <td>{{ $row->nama }}</td>
         <td>{{ $row->jenis }}</td>
         <td>{{ $row->satuan }}</td>
         <td>{{ $row->stok }}</td>

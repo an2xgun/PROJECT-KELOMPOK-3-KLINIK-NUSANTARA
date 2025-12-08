@@ -16,7 +16,7 @@
 </form>
 <hr>
 
-<form id="formPendaftaran" action="{{ route('pasien.index') }}" method="POST">
+<form id="formPendaftaran" action="{{ route('pendaftaran.store') }}" method="POST">
     @csrf
 
     {{-- pasien selection (set setelah cari atau pilih manual) --}}
@@ -33,7 +33,7 @@
             <select name="poliklinik_id" id="poliklinik" class="form-select" required>
                 <option value="">-- Pilih Poli --</option>
                 @foreach($polikliniks as $p)
-                    <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                    <option value="{{ $p->id }}">{{ $p->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -85,31 +85,63 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Simpan Pendaftaran</button>
-    <a href="{{ route('pasien.baru') }}" class="btn btn-secondary">Daftar Pasien Baru</a>
+    <a href="{{ route('pendaftaran.pasien_baru') }}" class="btn btn-secondary">Daftar Pasien Baru</a>
 </form>
 
 {{-- skrip ajax --}}
 <script>
-document.getElementById('btnSearch').addEventListener('click', function(){
+document.getElementById('btnSearch').addEventListener('click', function(e){
+    e.preventDefault();
     const q = document.getElementById('searchBox').value.trim();
     if(!q) return;
-    fetch('/pasien/search?q=' + encodeURIComponent(q))
-        .then(res => res.json())
-        .then(data => {
-            const box = document.getElementById('searchResult');
-            if(data.length === 0){
-                box.innerHTML = '<div class="alert alert-warning">Pasien tidak ditemukan. <a href="{{ route('pasien.create') }}">Daftar pasien baru</a></div>';
-                document.getElementById('pasien_id').value = '';
-            } else {
-                let html = '<div class="list-group">';
-                data.forEach(p => {
-                    html += `<button type="button" class="list-group-item list-group-item-action" onclick="selectPasien(${p.id}, ${JSON.stringify(p.no_rm)}, ${JSON.stringify(p.nama)})"> ${p.no_rm} - ${p.nama} (${p.nik || '-'})</button>`;
-                });
-                html += '</div>';
-                box.innerHTML = html;
-            }
-        });
+
+    // Try exact No RM lookup first when input resembles a No RM (digits or with RM prefix)
+    const digits = q.replace(/\D/g, '');
+    if(digits.length > 0) {
+        // normalize to 4-digit format (0001)
+        const normalized = digits.padStart(4, '0');
+        fetch('/api/patient/' + encodeURIComponent(normalized))
+            .then(res => res.json())
+            .then(obj => {
+                const box = document.getElementById('searchResult');
+                if(obj && obj.found) {
+                    // If found, select immediately
+                    selectPasien(obj.pasien.id, obj.pasien.no_rm, obj.pasien.nama);
+                } else {
+                    // Fallback to broader search endpoint
+                    fetch('/api/pasien/search?q=' + encodeURIComponent(q))
+                        .then(res => res.json())
+                        .then(data => renderSearchResults(data));
+                }
+            })
+            .catch(() => {
+                // On error fallback to search
+                fetch('/api/pasien/search?q=' + encodeURIComponent(q))
+                    .then(res => res.json())
+                    .then(data => renderSearchResults(data));
+            });
+    } else {
+        // If no digits, just run the normal search
+        fetch('/api/pasien/search?q=' + encodeURIComponent(q))
+            .then(res => res.json())
+            .then(data => renderSearchResults(data));
+    }
 });
+
+function renderSearchResults(data){
+    const box = document.getElementById('searchResult');
+    if(!data || data.length === 0){
+        box.innerHTML = '<div class="alert alert-warning">Pasien tidak ditemukan. <a href="{{ route('pasien.create') }}">Daftar pasien baru</a></div>';
+        document.getElementById('pasien_id').value = '';
+    } else {
+        let html = '<div class="list-group">';
+        data.forEach(p => {
+            html += `<button type="button" class="list-group-item list-group-item-action" onclick="selectPasien(${p.id}, ${JSON.stringify(p.no_rm)}, ${JSON.stringify(p.nama)})"> ${p.no_rm} - ${p.nama} (${p.nik || '-'})</button>`;
+        });
+        html += '</div>';
+        box.innerHTML = html;
+    }
+}
 
 function selectPasien(id,no_rm,nama){
     document.getElementById('pasien_id').value = id;

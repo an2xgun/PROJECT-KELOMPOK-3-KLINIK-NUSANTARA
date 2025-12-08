@@ -4,7 +4,7 @@
 
 <form method="POST" action="{{ route('pendaftaran.pasien_baru') }}" id="formPendaftaran">
   @csrf
-  <input type="hidden" name="pasien_id" value="{{ $pasien->id }}">
+  <input type="hidden" name="id_pasien" value="{{ $pasien->id }}">
 
   <div class="row">
     <div class="col-md-4 mb-3">
@@ -17,7 +17,7 @@
       <select id="poliklinik" name="poliklinik_id" class="form-select" required>
         <option value="">-- Pilih --</option>
         @foreach($polikliniks as $p)
-          <option value="{{ $p->id }}">{{ $p->nama }}</option>
+          <option value="{{ $p->id }}">{{ $p->name }}</option>
         @endforeach
       </select>
     </div>
@@ -54,6 +54,11 @@
       </select>
     </div>
 
+    <div class="col-md-4 mb-3" id="bpjsField" style="display:none;">
+      <label>No. BPJS / Asuransi</label>
+      <input type="text" name="no_bpjs" class="form-control" placeholder="Masukkan nomor BPJS atau polis">
+    </div>
+
     <div class="col-12 mb-3">
       <label>Catatan</label>
       <textarea name="catatan" class="form-control"></textarea>
@@ -81,6 +86,23 @@ document.getElementById('poliklinik').addEventListener('change', function(){
          el.innerHTML = h;
       });
 });
+
+// Toggle BPJS field when jenis pembayaran dipilih
+const jenisEl = document.querySelector('select[name="jenis_pembayaran"]');
+const bpjsField = document.getElementById('bpjsField');
+if(jenisEl){
+  function toggleBpjs(){
+    const v = jenisEl.value || '';
+    if(v.toLowerCase() === 'bpjs' || v.toLowerCase() === 'asuransi'){
+      bpjsField.style.display = 'block';
+    } else {
+      bpjsField.style.display = 'none';
+    }
+  }
+  jenisEl.addEventListener('change', toggleBpjs);
+  // initial
+  toggleBpjs();
+}
 </script>
 @endpush
 @endsection

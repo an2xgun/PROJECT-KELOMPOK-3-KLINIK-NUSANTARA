@@ -106,38 +106,30 @@
 
 {{-- SCRIPT HITUNG UMUR --}}
 <script>
+// Hitung ulang umur setiap kali tanggal lahir berubah
+document.querySelector('[name="tanggal_lahir"]').addEventListener('change', hitungUmur);
+
+// Hitung umur saat halaman dibuka
+window.addEventListener('load', hitungUmur);
+
 function hitungUmur() {
-    let value = document.querySelector('[name="tanggal_lahir"]').value;
-    if (!value) return;
+    let val = document.querySelector('[name="tanggal_lahir"]').value;
+    if (!val) return;
 
-    let lahir = new Date(value);
-    let now   = new Date();
+    let tgl = new Date(val);
+    let now = new Date();
 
-    let tahun = now.getFullYear() - lahir.getFullYear();
-    let bulan = now.getMonth() - lahir.getMonth();
-    let hari  = now.getDate() - lahir.getDate();
+    let tahun = now.getFullYear() - tgl.getFullYear();
+    let bulan = now.getMonth() - tgl.getMonth();
+    let hari  = now.getDate() - tgl.getDate();
 
-    if (hari < 0) {
-        hari += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-        bulan--;
-    }
-
-    if (bulan < 0) {
-        bulan += 12;
-        tahun--;
-    }
+    if (hari < 0) { hari += 30; bulan--; }
+    if (bulan < 0) { bulan += 12; tahun--; }
 
     document.querySelector('[name="umur_tahun"]').value = tahun;
     document.querySelector('[name="umur_bulan"]').value = bulan;
-    document.querySelector('[name="umur_hari"]').value  = hari;
+    document.querySelector('[name="umur_hari"]').value = hari;
 }
-
-// Hitung saat user mengubah tanggal lahir
-document.querySelector('[name="tanggal_lahir"]').addEventListener('change', hitungUmur);
-
-// Hitung saat halaman dibuka (untuk edit)
-window.addEventListener('load', hitungUmur);
 </script>
-
 
 @endsection

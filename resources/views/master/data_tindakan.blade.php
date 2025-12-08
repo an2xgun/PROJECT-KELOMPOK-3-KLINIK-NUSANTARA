@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layout')
 
 @section('content')
 <h3>🛠 Data Tindakan</h3>

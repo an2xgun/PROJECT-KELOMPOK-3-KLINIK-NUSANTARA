@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layout')
 
 @section('content')
 <h3>🧪 Farmasi</h3>
@@ -13,7 +13,7 @@
 
     @foreach($farmasi as $item)
     <tr>
-        <td>{{ $item->obat->nama_obat }}</td>
+        <td>{{ $item->obat->nama }}</td>
         <td>{{ $item->stok_masuk }}</td>
         <td>{{ $item->stok_keluar }}</td>
         <td>{{ $item->sisa_stok }}</td>

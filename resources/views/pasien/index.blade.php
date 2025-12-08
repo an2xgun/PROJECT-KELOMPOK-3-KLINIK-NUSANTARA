@@ -37,12 +37,18 @@
             <td>{{ $item->umur_tahun }} th</td>
 
             <td class="text-center">
-                <a href="{{ route('pasien.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                @if(Auth::user()->role === 'admin' || Auth::user()->role === 'petugas_pendaftaran')
+                    <a href="{{ route('pasien.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
 
-                <form action="{{ route('pasien.destroy', $item->id) }}" method="POST" class="d-inline">
-                    @csrf @method('DELETE')
-                    <button class="btn btn-danger btn-sm" onclick="return confirm('Hapus pasien?')">Hapus</button>
-                </form>
+                    @if(Auth::user()->role === 'admin')
+                        <form action="{{ route('pasien.destroy', $item->id) }}" method="POST" class="d-inline">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-danger btn-sm" onclick="return confirm('Hapus pasien?')">Hapus</button>
+                        </form>
+                    @endif
+                @else
+                    <span class="text-muted">-</span>
+                @endif
             </td>
         </tr>
         @empty
@@ -52,39 +58,6 @@
         @endforelse
     </tbody>
 </table>
-<script>
-function hitungUmur() {
-    let value = document.querySelector('[name="tanggal_lahir"]').value;
-    if (!value) return;
-
-    let lahir = new Date(value);
-    let now   = new Date();
-
-    let tahun = now.getFullYear() - lahir.getFullYear();
-    let bulan = now.getMonth() - lahir.getMonth();
-    let hari  = now.getDate() - lahir.getDate();
-
-    if (hari < 0) {
-        hari += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-        bulan--;
-    }
-
-    if (bulan < 0) {
-        bulan += 12;
-        tahun--;
-    }
-
-    document.querySelector('[name="umur_tahun"]').value = tahun;
-    document.querySelector('[name="umur_bulan"]').value = bulan;
-    document.querySelector('[name="umur_hari"]').value  = hari;
-}
-
-// Hitung saat user mengubah tanggal lahir
-document.querySelector('[name="tanggal_lahir"]').addEventListener('change', hitungUmur);
-
-// Hitung saat halaman dibuka (untuk edit)
-window.addEventListener('load', hitungUmur);
-</script>
 
 {{ $data->links() }}
 
