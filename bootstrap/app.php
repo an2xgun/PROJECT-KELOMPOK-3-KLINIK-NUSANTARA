@@ -11,6 +11,7 @@
 |
 */
 
+<<<<<<< HEAD
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
@@ -53,3 +54,21 @@ $app->singleton(
 */
 
 return $app;
+=======
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->statefulApi();
+        
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+    })->create();
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568

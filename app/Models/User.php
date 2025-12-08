@@ -41,7 +41,18 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+<<<<<<< HEAD
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+=======
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'settings' => 'array',
+        ];
+    }
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
 }

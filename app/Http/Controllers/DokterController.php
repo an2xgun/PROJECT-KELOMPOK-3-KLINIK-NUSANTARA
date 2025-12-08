@@ -1,14 +1,19 @@
 <?php
-
 namespace App\Http\Controllers;
+<<<<<<< HEAD
 
 use App\Models\Dokter;
 use App\Models\Poli;
 use App\Models\Jadwal;
+=======
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
 use Illuminate\Http\Request;
+use App\Models\Dokter;
+use App\Models\Poliklinik;
 
 class DokterController extends Controller
 {
+<<<<<<< HEAD
     /**
      * Display a listing of the resource.
      *
@@ -18,6 +23,17 @@ class DokterController extends Controller
     {
         $datadokter = Dokter::get();
         return view('dokter', compact('datadokter'));
+=======
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    public function index()
+    {
+        $data = Dokter::with('poliklinik')->paginate(15);
+        return view('master.dokter.index', compact('data'));
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 
     /**
@@ -27,6 +43,7 @@ class DokterController extends Controller
      */
     public function create()
     {
+<<<<<<< HEAD
         $jadwalvariabel = Jadwal::all();
         return view('dokter-form', [
             'jadwalvariabel' => $jadwalvariabel,
@@ -34,6 +51,24 @@ class DokterController extends Controller
         ]);
 
         
+=======
+        $polikliniks = Poliklinik::all();
+        return view('master.dokter.create', compact('polikliniks'));
+    }
+
+    public function store(Request $r)
+    {
+        $validated = $r->validate([
+            'nama' => 'required|string',
+            'alamat' => 'nullable|string',
+            'poliklinik_id' => 'required|exists:polikliniks,id',
+            'telepon' => 'required|string',
+            'jadwalpraktek' => 'required|string'
+        ]);
+
+        Dokter::create($validated);
+        return redirect()->route('master.jadwal_dokter')->with('success','Dokter ditambahkan');
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 
     /**
@@ -88,10 +123,16 @@ class DokterController extends Controller
      */
     public function edit($id)
     {
+<<<<<<< HEAD
         $jadwalvariabel = Jadwal::all();
         $dokter = Dokter::findOrfail($id);
         $poli = Poli::all();
         return view('dokter-form-edit', compact('dokter','jadwalvariabel', 'poli'));
+=======
+        $dokter = Dokter::findOrFail($id);
+        $polikliniks = Poliklinik::all();
+        return view('master.dokter.edit', compact('dokter', 'polikliniks'));
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 
     /**
@@ -103,6 +144,7 @@ class DokterController extends Controller
      */
     public function update(Request $request, $id)
     {
+<<<<<<< HEAD
         // dd($request);
         $this->validate($request, [
             
@@ -128,6 +170,18 @@ class DokterController extends Controller
         ]);
 
         return redirect()->route('dokter.index')->with('success', 'Data telah diubah');
+=======
+        $validated = $r->validate([
+            'nama' => 'required|string',
+            'alamat' => 'nullable|string',
+            'poliklinik_id' => 'required|exists:polikliniks,id',
+            'telepon' => 'required|string',
+            'jadwalpraktek' => 'required|string'
+        ]);
+
+        Dokter::findOrFail($id)->update($validated);
+        return redirect()->route('master.jadwal_dokter')->with('success','Dokter diupdate');
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 
     /**
@@ -138,7 +192,12 @@ class DokterController extends Controller
      */
     public function destroy(Dokter $dokter)
     {
+<<<<<<< HEAD
         $dokter->delete();
         return redirect()->back();
+=======
+        Dokter::destroy($id);
+        return back()->with('success','Dokter dihapus');
+>>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 }
