@@ -1,14 +1,12 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class obat extends Model
+class Obat extends Model
 {
     use HasFactory;
-
+    protected $table = 'obats';
     protected $fillable = [
         'kodeobat',
         'stok',
@@ -17,16 +15,18 @@ class obat extends Model
         'dosis',
         'harga',
         'expired',
-        'photo',
+        'photo'
     ];
 
-    protected $guarded =['id'];
+    protected $dates = ['expired'];
 
-    public function rekam(){
-        return $this->hasMany(Pasien::class);
+    public function jenis()
+    {
+        return $this->belongsTo(JenisObat::class, 'id_jenis');
     }
 
-    public function jenis(){
-        return $this->belongsTo(Jenis::class, 'id_jenis');
+    public function prescriptionItems()
+    {
+        return $this->hasMany(PrescriptionItem::class);
     }
 }
