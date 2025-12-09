@@ -12,12 +12,12 @@
 
   <style>
   :root{
-    --primary-start: #667eea; /* default blue gradient start */
+    --primary-start: #617dfbff; /* default blue gradient start */
     --primary-end: #764ba2;   /* default blue gradient end */
-    --accent-color: #ff66a3; /* pink accent (used for day) */
+    --accent-color: #f75093ff; /* pink accent (used for day) */
     --text-on-primary: #ffffff;
-    --sidebar-bg: #2c3e50;
-    --bg-main: #f5f7fa; /* page background */
+    --sidebar-bg: #263e56ff;
+    --bg-main: #e6effdff; /* page background */
     --text-main: #203241; /* main text color for readability */
     --navbar-height: 60px; /* fallback, will be updated via JS to match actual navbar */
   }
