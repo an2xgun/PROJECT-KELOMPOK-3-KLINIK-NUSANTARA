@@ -37,7 +37,7 @@
                 <div class="card-body">
                     <p><strong>Nomor Invoice:</strong> INV-{{ str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</p>
                     <p><strong>Layanan:</strong> {{ $invoice->layanan }}</p>
-                    <p><strong>Tanggal:</strong> {{ $invoice->created_at->format('d/m/Y H:i') }}</p>
+                    <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($invoice->created_at)->format('d/m/Y H:i') }}</p>
                     <p><strong>Jenis Pembayaran:</strong> {{ $invoice->jenis_pembayaran ?? '-' }}</p>
                     @if($invoice->no_bpjs)
                         <p><strong>No. BPJS / Asuransi:</strong> {{ $invoice->no_bpjs }}</p>
@@ -56,9 +56,9 @@
                             {{ $statusLabel }}
                         </span>
                     </p>
-                    @if($invoice->paid_at)
-                       {{ \Carbon\Carbon::parse($invoice->paid_at)->format('d/m/Y H:i') }}
-                    @endif
+                          @if($invoice->paid_at)
+                              {{ \Carbon\Carbon::parse($invoice->paid_at)->format('d/m/Y H:i') }}
+                          @endif
                 </div>
             </div>
 
@@ -231,7 +231,7 @@
                                     </div>
                                     <div class="text-end">
                                         <div>Rp {{ number_format($p->amount,0,',','.') }}</div>
-                                        <div><small>{{ $p->paid_at ? $p->paid_at->format('d/m/Y H:i') : $p->created_at->format('d/m/Y H:i') }}</small></div>
+                                        <div><small>{{ $p->paid_at ? \Carbon\Carbon::parse($p->paid_at)->format('d/m/Y H:i') : \Carbon\Carbon::parse($p->created_at)->format('d/m/Y H:i') }}</small></div>
                                     </div>
                                 </li>
                             @endforeach
