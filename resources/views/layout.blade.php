@@ -387,10 +387,10 @@
 
   {{-- ALUR UTAMA: PENDAFTARAN (visible untuk: admin, petugas pendaftaran) --}}
   @if(Auth::user()->role === 'admin' || Auth::user()->role === 'petugas_pendaftaran')
-  <div class="sidebar-title"><i class="bi bi-door-left"></i> Pendaftaran Pasien</div>
+  <div class="sidebar-title"><i class="bi bi-door-left"></i> 🏥Pendaftaran Pasien</div>
   <a href="{{ route('pendaftaran.choice') }}" class="{{ request()->is('pendaftaran/choice*') ? 'active' : '' }}">
     <i class="bi bi-plus-circle"></i>
-    <span>🏥Pendaftaran</span>
+    <span>Pendaftaran</span>
   </a>
   <a href="{{ route('pendaftaran.list') }}" class="{{ request()->is('pendaftaran/list*') ? 'active' : '' }}">
     <i class="bi bi-list-check"></i> 
