@@ -127,4 +127,30 @@
     @endif
 </div>
 
+<script>
+// Simple polling to auto-refresh pending prescriptions for apoteker
+(() => {
+    const POLL_INTERVAL = 10000; // 10 seconds
+    let lastCount = {{ $prescriptions->count() }};
+
+    async function checkPending() {
+        try {
+            const res = await fetch('/api/prescriptions/pending', { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            const count = Array.isArray(data.data) ? data.data.length : 0;
+            if (count !== lastCount) {
+                // If difference detected, reload to update UI (simple and reliable)
+                console.log('[POLL] Pending prescriptions changed:', lastCount, '→', count);
+                location.reload();
+            }
+        } catch (e) {
+            console.error('[POLL] Error fetching pending prescriptions', e);
+        }
+    }
+
+    setInterval(checkPending, POLL_INTERVAL);
+})();
+</script>
+
 @endsection

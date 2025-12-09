@@ -99,6 +99,9 @@ Route::get('/api/pasien/search', [AjaxController::class, 'searchPasien'])->middl
 // AJAX: suggest No RM values for autocomplete
 Route::get('/api/pasien/suggest-no-rm', [AjaxController::class, 'suggestNoRm'])->middleware('auth');
 
+// API: pending prescriptions (apotik polling)
+Route::get('/api/prescriptions/pending', [App\Http\Controllers\PrescriptionController::class, 'pendingJson'])->middleware('auth');
+
 // -------------------------
 // PASIEN (admin, petugas_pendaftaran)
 // -------------------------

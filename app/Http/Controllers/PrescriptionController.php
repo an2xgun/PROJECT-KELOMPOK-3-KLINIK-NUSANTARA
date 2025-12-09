@@ -156,6 +156,40 @@ class PrescriptionController extends Controller
     }
 
     /**
+     * Return pending prescriptions as JSON (for apotik polling)
+     */
+    public function pendingJson(Request $request)
+    {
+        $this->checkApotekerAccess();
+
+        $prescriptions = Prescription::with(['items.obat', 'rekam.pasien', 'rekam.dokter', 'rekam.pendaftaran.poliklinik', 'dokter'])
+            ->where('status', 'Pending')
+            ->orderBy('created_at', 'ASC')
+            ->get()
+            ->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'rekam_id' => $p->rekam_id,
+                    'pasien' => optional(optional($p->rekam)->pendaftaran)->pasien->nama ?? optional($p->rekam->pasien)->nama ?? null,
+                    'no_rm' => data_get(optional(optional($p->rekam)->pendaftaran)->pasien, 'no_rm') ?? null,
+                    'poliklinik' => optional(optional($p->rekam)->pendaftaran)->poliklinik->name ?? null,
+                    'created_at' => $p->created_at ? $p->created_at->toDateTimeString() : null,
+                    'items' => $p->items->map(function($it) {
+                        return [
+                            'nama' => optional($it->obat)->nama ?? null,
+                            'jumlah' => $it->jumlah,
+                            'dosis' => $it->dosis,
+                            'subtotal' => $it->subtotal,
+                        ];
+                    })->toArray(),
+                    'total' => $p->items->sum('subtotal')
+                ];
+            });
+
+        return response()->json(['data' => $prescriptions]);
+    }
+
+    /**
      * Apotik processes/fulfills prescription with auto stock reduction
      */
     public function process($prescriptionId, Request $request)

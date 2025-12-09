@@ -1,6 +1,7 @@
 @extends('layout')
 @section('content')
 
+{{-- Using fully-qualified Str calls to avoid duplicate imports --}}
 <div class="container-fluid mt-4">
     <div class="row mb-3">
         <div class="col">
@@ -50,7 +51,7 @@
                                 @if($invoice->status === 'paid')
                                     Dibayar
                                 @elseif(str_starts_with($invoice->status, 'paid_by_'))
-                                    Dibayar ({{ strtoupper(str_after($invoice->status, 'paid_by_')) }})
+                                    Dibayar ({{ strtoupper(\Illuminate\Support\Str::after($invoice->status, 'paid_by_')) }})
                                 @else
                                     Belum Dibayar
                                 @endif

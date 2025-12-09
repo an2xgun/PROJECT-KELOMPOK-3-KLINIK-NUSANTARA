@@ -1,6 +1,8 @@
 @extends('layout')
 @section('content')
 
+{{-- Using fully-qualified Str calls to avoid duplicate imports --}}
+
 <div class="container-fluid mt-4">
     <div class="row mb-3">
         <div class="col">
@@ -47,9 +49,10 @@
                     @endif
                     <p><strong>Status:</strong>
                         @php
+                            use Illuminate\Support\Str;
                             $statusLabel = $invoice->status;
                             if(str_starts_with($invoice->status, 'paid_by_')){
-                                $statusLabel = 'Dibayar oleh ' . strtoupper(str_after($invoice->status, 'paid_by_'));
+                                $statusLabel = 'Dibayar oleh ' . strtoupper(\Illuminate\Support\Str::after($invoice->status, 'paid_by_'));
                             }
                         @endphp
                         <span class="badge {{ $invoice->status === 'paid' || str_starts_with($invoice->status, 'paid_by_') ? 'bg-success' : 'bg-warning' }}">
@@ -181,7 +184,7 @@
                             $paidOrCovered = $invoice->status === 'paid' || str_starts_with($invoice->status, 'paid_by_');
                             $statusText = 'BELUM DIBAYAR';
                             if($invoice->status === 'paid') $statusText = 'SUDAH DIBAYAR';
-                            if(str_starts_with($invoice->status, 'paid_by_')) $statusText = 'DIBAYAR OLEH ' . strtoupper(str_after($invoice->status, 'paid_by_'));
+                            if(str_starts_with($invoice->status, 'paid_by_')) $statusText = 'DIBAYAR OLEH ' . strtoupper(\Illuminate\Support\Str::after($invoice->status, 'paid_by_'));
                         @endphp
                         <p class="badge {{ $paidOrCovered ? 'bg-success' : 'bg-danger' }} p-2">
                             {{ $statusText }}
