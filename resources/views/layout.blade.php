@@ -390,7 +390,7 @@
   <div class="sidebar-title"><i class="bi bi-door-left"></i> Pendaftaran Pasien</div>
   <a href="{{ route('pendaftaran.choice') }}" class="{{ request()->is('pendaftaran/choice*') ? 'active' : '' }}">
     <i class="bi bi-plus-circle"></i>
-    <span>Pendaftaran Baru</span>
+    <span>🏥Pendaftaran</span>
   </a>
   <a href="{{ route('pendaftaran.list') }}" class="{{ request()->is('pendaftaran/list*') ? 'active' : '' }}">
     <i class="bi bi-list-check"></i> 
@@ -402,7 +402,7 @@
   @if(Auth::user()->role === 'admin' || Auth::user()->role === 'dokter')
   @if(Auth::user()->role !== 'petugas_pendaftaran')
   <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-  <div class="sidebar-title"><i class="bi bi-stethoscope"></i> Pemeriksaan Medis</div>
+  <div class="sidebar-title"><i class="bi bi-stethoscope"></i> 🩺Pemeriksaan Medis</div>
   @endif
   <!-- Tampilkan antrian pemeriksaan langsung ke route dokter untuk admin dan dokter -->
   <a href="{{ route('examination.queue') }}" class="{{ request()->is('examination/queue*') ? 'active' : '' }}" style="display: flex; align-items: center; justify-content: space-between;">
