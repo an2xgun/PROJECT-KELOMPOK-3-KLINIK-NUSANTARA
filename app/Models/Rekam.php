@@ -67,6 +67,11 @@ class Rekam extends Model
         return $this->belongsToMany(MasterTindakan::class, 'rekam_tindakan', 'rekam_id', 'master_tindakan_id');
     }
 
+    public function diagnosas()
+    {
+        return $this->belongsToMany(\App\Models\MasterDiagnosa::class, 'rekam_diagnosa', 'rekam_id', 'diagnosa_id');
+    }
+
     public function prescription()
     {
         return $this->hasOne(Prescription::class);

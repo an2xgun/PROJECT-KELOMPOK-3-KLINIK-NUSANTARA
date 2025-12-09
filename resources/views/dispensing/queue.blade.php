@@ -69,7 +69,7 @@
                                                 <span class="badge bg-secondary">{{ $prescription->status }}</span>
                                             @endif
                                         </td>
-                                        <td>{{ $prescription->created_at->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $prescription->created_at ? \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') : '-' }}</td>
                                         <td>
                                             <a href="{{ route('dispensing.form', $prescription->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="bi bi-box-arrow-in-right"></i> Berikan

@@ -59,7 +59,7 @@
                             <span class="badge bg-success">Selesai</span>
                         @endif
                     </td>
-                    <td>{{ $item->created_at->format('d/m/Y H:i') ?? '-' }}</td>
+                    <td>{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->format('d/m/Y H:i') : '-' }}</td>
                     <td>
                         @if(Auth::user()->role === 'admin' || Auth::user()->role === 'petugas_pendaftaran')
                             @if($item->status_layanan === 'Menunggu')

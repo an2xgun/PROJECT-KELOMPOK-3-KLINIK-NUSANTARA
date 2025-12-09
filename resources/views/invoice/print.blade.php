@@ -12,7 +12,7 @@
             <p><strong>Nomor Invoice:</strong> INV-{{ str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</p>
             <p><strong>Nama Pasien:</strong> {{ optional($invoice->pasien)->nama ?? '-' }}</p>
             <p><strong>No. RM:</strong> {{ optional($invoice->pasien)->no_rm ?? '-' }}</p>
-            <p><strong>Tanggal:</strong> {{ $invoice->created_at->format('d/m/Y H:i') }}</p>
+            <p><strong>Tanggal:</strong> {{ $invoice->created_at ? \Carbon\Carbon::parse($invoice->created_at)->format('d/m/Y H:i') : '-' }}</p>
             <p><strong>Jenis Pembayaran:</strong> {{ $invoice->jenis_pembayaran ?? ($invoice->status ?? '-') }}</p>
             @if($invoice->no_bpjs)
                 <p><strong>No. BPJS/Asuransi:</strong> {{ $invoice->no_bpjs }}</p>

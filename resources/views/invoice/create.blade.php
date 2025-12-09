@@ -7,7 +7,7 @@
     <div class="card mb-3">
         <div class="card-body">
             <p><strong>Pasien:</strong> {{ optional($rekam->pasien)->nama ?? '-' }} (No RM: {{ optional($rekam->pasien)->no_rm ?? '-' }})</p>
-            <p><strong>Tanggal Periksa:</strong> {{ $rekam->tanggalperiksa ? $rekam->tanggalperiksa->format('d/m/Y') : '-' }}</p>
+            <p><strong>Tanggal Periksa:</strong> {{ $rekam->tanggalperiksa ? \Carbon\Carbon::parse($rekam->tanggalperiksa)->format('d/m/Y') : '-' }}</p>
             <p><strong>Layanan (Poli):</strong> {{ $rekam->layanan ?? '-' }}</p>
         </div>
     </div>

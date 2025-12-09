@@ -50,7 +50,7 @@
                                 {{ ucfirst($invoice->status) }}
                             </span>
                         </td>
-                        <td>{{ $invoice->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $invoice->created_at ? \Carbon\Carbon::parse($invoice->created_at)->format('d/m/Y') : '-' }}</td>
                         <td>
                             <a href="{{ route('invoice.show', $invoice->id) }}" class="btn btn-sm btn-info">Lihat</a>
                             @if($invoice->status === 'unpaid')

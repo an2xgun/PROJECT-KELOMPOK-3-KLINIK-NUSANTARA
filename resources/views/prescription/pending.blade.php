@@ -86,7 +86,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <small class="text-muted">Tanggal Resep</small>
-                                    <p>{{ $prescription->created_at->format('d/m/Y H:i') }}</p>
+                                    <p>{{ $prescription->created_at ? \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') : '-' }}</p>
                                 </div>
                             </div>
 

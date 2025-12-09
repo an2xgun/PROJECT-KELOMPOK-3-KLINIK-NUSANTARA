@@ -84,7 +84,7 @@
                         @forelse($resep as $r)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ optional($r->rekam)->created_at ? $r->rekam->created_at->format('d/m/Y H:i') : '-' }}</td>
+                                <td>{{ optional($r->rekam)->created_at ? \Carbon\Carbon::parse($r->rekam->created_at)->format('d/m/Y H:i') : '-' }}</td>
                                 <td>
                                     <strong>{{ optional(optional($r->rekam)->pasien)->nama ?? '-' }}</strong>
                                     <br><small class="text-muted">{{ optional(optional($r->rekam)->pasien)->no_rekam_medis ?? '-' }}</small>

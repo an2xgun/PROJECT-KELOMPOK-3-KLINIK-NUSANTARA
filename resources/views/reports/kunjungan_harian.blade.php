@@ -110,7 +110,7 @@
                                 @endphp
                                 <span class="badge {{ $badge }}">{{ $status ?? '-' }}</span>
                             </td>
-                            <td>{{ $k->created_at->format('H:i') }}</td>
+                            <td>{{ $k->created_at ? \Carbon\Carbon::parse($k->created_at)->format('H:i') : '-' }}</td>
                         </tr>
                     @empty
                         <tr>

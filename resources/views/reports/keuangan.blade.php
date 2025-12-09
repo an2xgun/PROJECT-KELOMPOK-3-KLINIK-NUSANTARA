@@ -128,7 +128,7 @@
                                 @forelse($invoices as $inv)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ optional($inv->rekam)->created_at ? $inv->rekam->created_at->format('d/m/Y') : '-' }}</td>
+                                        <td>{{ optional($inv->rekam)->created_at ? \Carbon\Carbon::parse($inv->rekam->created_at)->format('d/m/Y') : '-' }}</td>
                                         <td>{{ $inv->no_invoice ?? 'AUTO' }}</td>
                                         <td>
                                             <strong>{{ optional(optional($inv->rekam)->pasien)->nama ?? '-' }}</strong>
@@ -185,7 +185,7 @@
                                 @forelse($prescriptions as $p)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ optional($p->rekam)->created_at ? $p->rekam->created_at->format('d/m/Y') : '-' }}</td>
+                                        <td>{{ optional($p->rekam)->created_at ? \Carbon\Carbon::parse($p->rekam->created_at)->format('d/m/Y') : '-' }}</td>
                                         <td>
                                             <strong>{{ optional(optional($p->rekam)->pasien)->nama ?? '-' }}</strong>
                                         </td>

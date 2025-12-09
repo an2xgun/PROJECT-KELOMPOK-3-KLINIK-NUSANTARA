@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-md-3">
                             <small class="text-muted">Tanggal Pemeriksaan</small>
-                            <p><strong>{{ $rekam->created_at->format('d/m/Y H:i') }}</strong></p>
+                            <p><strong>{{ $rekam->created_at ? \Carbon\Carbon::parse($rekam->created_at)->format('d/m/Y H:i') : '-' }}</strong></p>
                         </div>
                     </div>
                     <hr>

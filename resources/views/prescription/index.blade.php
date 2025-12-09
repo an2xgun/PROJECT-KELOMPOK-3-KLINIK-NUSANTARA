@@ -71,7 +71,7 @@
                             <span class="badge bg-secondary">{{ $prescription->status }}</span>
                         @endif
                     </td>
-                    <td>{{ $prescription->created_at->format('d/m/Y H:i') }}</td>
+                    <td>{{ $prescription->created_at ? \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') : '-' }}</td>
                     <td>
                         <a href="{{ route('prescription.show', $prescription->id) }}" class="btn btn-sm btn-info" title="Lihat Detail">
                             <i class="bi bi-eye"></i> Lihat

@@ -19,7 +19,7 @@
                             No. Identitas: {{ optional(optional($pendaftaran)->pasien)->no_identitas ?? '-' }}<br>
                             Poliklinik: {{ optional(optional($pendaftaran)->poliklinik)->nama ?? '-' }}<br>
                             Dokter: {{ optional($pendaftaran->dokter)->nama ?? 'Belum ditentukan' }}<br>
-                            Waktu: {{ optional($pendaftaran)->created_at ? $pendaftaran->created_at->format('d M Y H:i') : '-' }}
+                            Waktu: {{ optional($pendaftaran)->created_at ? \Carbon\Carbon::parse(optional($pendaftaran)->created_at)->format('d M Y H:i') : '-' }}
                         </small>
                     </div>
 

@@ -141,7 +141,7 @@
                                 @forelse($pemeriksaan as $p)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $p->created_at->format('d/m/Y H:i') ?? '-' }}</td>
+                                        <td>{{ $p->created_at ? \Carbon\Carbon::parse($p->created_at)->format('d/m/Y H:i') : '-' }}</td>
                                         <td>
                                             <strong>{{ optional($p->pasien)->nama ?? '-' }}</strong>
                                         </td>

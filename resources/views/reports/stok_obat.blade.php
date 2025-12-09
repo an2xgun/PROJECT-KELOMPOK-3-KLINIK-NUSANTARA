@@ -101,12 +101,13 @@
                                 <td>Rp {{ number_format($o->harga ?? 0, 0, ',', '.') }}</td>
                                 <td>
                                     @if($o->expired)
-                                        @if($o->expired < now())
+                                        @php $exp = \Carbon\Carbon::parse($o->expired); @endphp
+                                        @if($exp < now())
                                             <span class="badge bg-danger">EXPIRED</span>
-                                        @elseif($o->expired < now()->addDays(30))
-                                            <span class="badge bg-warning">{{ $o->expired->format('d/m/Y') }}</span>
+                                        @elseif($exp < now()->addDays(30))
+                                            <span class="badge bg-warning">{{ $exp->format('d/m/Y') }}</span>
                                         @else
-                                            {{ $o->expired->format('d/m/Y') }}
+                                            {{ $exp->format('d/m/Y') }}
                                         @endif
                                     @else
                                         -

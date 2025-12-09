@@ -50,11 +50,11 @@
                     <div class="row">
                         <div class="col-md-6">
                             <small class="text-muted">Tanggal Pemeriksaan</small>
-                            <p>{{ optional($prescription->rekam)->created_at ? optional($prescription->rekam)->created_at->format('d/m/Y H:i') : '-' }}</p>
+                            <p>{{ optional($prescription->rekam)->created_at ? \Carbon\Carbon::parse(optional($prescription->rekam)->created_at)->format('d/m/Y H:i') : '-' }}</p>
                         </div>
                         <div class="col-md-6">
                             <small class="text-muted">Tanggal Resep</small>
-                            <p>{{ $prescription->created_at->format('d/m/Y H:i') }}</p>
+                            <p>{{ $prescription->created_at ? \Carbon\Carbon::parse($prescription->created_at)->format('d/m/Y H:i') : '-' }}</p>
                         </div>
                     </div>
                 </div>

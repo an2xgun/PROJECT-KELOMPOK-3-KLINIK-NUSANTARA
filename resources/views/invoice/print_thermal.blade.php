@@ -24,7 +24,7 @@
       <div>INV: INV-{{ str_pad($invoice->id,5,'0',STR_PAD_LEFT) }}</div>
       <div>Pasien: {{ optional($invoice->pasien)->nama ?? '-' }}</div>
       <div>NoRM: {{ optional($invoice->pasien)->no_rm ?? '-' }}</div>
-      <div>Tgl: {{ $invoice->created_at->format('d/m/Y H:i') }}</div>
+      <div>Tgl: {{ $invoice->created_at ? \Carbon\Carbon::parse($invoice->created_at)->format('d/m/Y H:i') : '-' }}</div>
     </div>
 
     <hr>
