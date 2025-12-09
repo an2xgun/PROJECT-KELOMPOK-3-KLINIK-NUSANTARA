@@ -3,37 +3,25 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-<<<<<<< HEAD
-use Carbon\Carbon;
-=======
 use Illuminate\Support\Facades\View;
 use App\Models\Pendaftaran;
 use Illuminate\Support\Facades\Auth;
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-<<<<<<< HEAD
-        config(['app.locale' => 'id']);
-		Carbon::setLocale('id');
-=======
         // Global helper to safely traverse model relations/arrays by path string
         if (! function_exists(__NAMESPACE__ . '\\safe')) {
             function safe($root, string $path, $fallback = '-') {
@@ -83,6 +71,5 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('pending_pendaftaran_count', 0);
             }
         });
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 }

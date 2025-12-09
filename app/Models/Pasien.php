@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -10,48 +8,24 @@ use Carbon\Carbon;
 class Pasien extends Model
 {
     use HasFactory;
-<<<<<<< HEAD
-    protected $fillable = [
-        'kodepasien',
-=======
     protected $table = 'pasiens';
 
     protected $fillable = [
         'no_rm',
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
         'nama',
-        'alamat',
-        'lahir',
         'nik',
-<<<<<<< HEAD
-=======
         'alamat',
         'provinsi',
         'lahir',
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
         'kelamin',
         'telepon',
         'agama',
         'pendidikan',
-<<<<<<< HEAD
-        'pekerjaan'
-=======
         'pekerjaan',
         'golongan_darah',
         'jenis_pasien',
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     ];
-    protected $guarded =['id'];
 
-<<<<<<< HEAD
-    protected $dates = ['lahir', 'created_at', 'updated_at', 'jadwal_kedatangan', 'jadwal_selesai'];
-    // public function dokters() {
-    //     return $this->hasMany(Dokter::class);
-    // }
-
-    public function rekam(){
-        return $this->hasMany(Rekam::class, 'id');
-=======
     /**
      * Generate next no_rm (0001, 0002, etc.)
      */
@@ -129,7 +103,7 @@ class Pasien extends Model
 
     public function pendaftaran()
     {
-        return $this->hasMany(Pendaftaran::class, 'id_pasien');
+        return $this->hasMany(Pendaftaran::class, 'pasien_id');
     }
 
     public function rekam()
@@ -175,6 +149,6 @@ class Pasien extends Model
         } catch (\Exception $e) {
             return '';
         }
->>>>>>> 8d9dc5c10d4e1a2398b8f8ca4ab547e2bde2f568
     }
 }
+

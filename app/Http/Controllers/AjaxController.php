@@ -12,20 +12,29 @@ class AjaxController extends Controller
     // Search pasien by NIK, Nama, No RM
     public function searchPasien(Request $request)
     {
-        $query = $request->get('q', '');
-        
-        if(strlen($query) < 2) {
-            return response()->json([]);
+        $query = (string) $request->get('q', '');
+        $page = max(1, (int) $request->get('page', 1));
+        $limit = max(5, min(50, (int) $request->get('limit', 10)));
+
+        if (strlen($query) < 2) {
+            return response()->json(['items' => [], 'more' => false]);
         }
 
-        $pasiens = Pasien::where('nama', 'LIKE', "%{$query}%")
-            ->orWhere('nik', 'LIKE', "%{$query}%")
-            ->orWhere('no_rm', 'LIKE', "%{$query}%")
-            ->select('id', 'no_rm', 'nama', 'nik', 'tanggal_lahir')
-            ->limit(10)
-            ->get();
+        $qb = Pasien::where(function($q) use ($query) {
+            $q->where('nama', 'LIKE', "%{$query}%")
+              ->orWhere('nik', 'LIKE', "%{$query}%")
+              ->orWhere('no_rm', 'LIKE', "%{$query}%");
+        })->select('id', 'no_rm', 'nama', 'nik', 'tanggal_lahir');
 
-        return response()->json($pasiens);
+        $total = $qb->count();
+        $items = $qb->orderBy('nama')->offset(($page-1)*$limit)->limit($limit)->get();
+
+        $more = ($page * $limit) < $total;
+
+        return response()->json([
+            'items' => $items,
+            'more' => $more,
+        ]);
     }
 
     // Get jadwal poli by poliklinik_id
@@ -72,13 +81,16 @@ class AjaxController extends Controller
     public function getPatientByNoRm($noRm)
     {
         $pasien = Pasien::where('no_rm', $noRm)
-            ->select('id', 'no_rm', 'kodepasien', 'nama', 'alamat', 'telepon', 'lahir as tanggal_lahir', 'nik')
+            ->select('id', 'no_rm', 'kodepasien', 'nama', 'alamat', 'telepon', 'lahir', 'nik')
             ->first();
 
         if (!$pasien) {
             return response()->json(null, 404);
         }
 
+        // Transform 'lahir' to 'tanggal_lahir' for frontend
+        $pasien->tanggal_lahir = $pasien->lahir;
+        
         return response()->json($pasien);
     }
 

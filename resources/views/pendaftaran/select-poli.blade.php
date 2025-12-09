@@ -172,7 +172,20 @@ function loadJadwal() {
                     console.log('[JADWAL DEBUG] Jadwal dropdown updated with', data.length, 'items (from /ajax/jadwal-by-poli)');
                     return;
                 }
-                // nothing found
+                // nothing found — try server-side doctors fallback (show doctors even when no jadwal exists)
+                const doctorsMap = window.serverDokters || {};
+                const doctors = doctorsMap[poliId] || [];
+                if (doctors.length > 0) {
+                    let hd = '<option value="">-- Pilih Jadwal --</option>';
+                    doctors.forEach(d => {
+                        hd += `<option value="dokter-${d.id}">No jadwal - Dr. ${d.nama}</option>`;
+                    });
+                    jadwalSelect.innerHTML = hd;
+                    jadwalSelect.disabled = false;
+                    console.log('[JADWAL DEBUG] Jadwal dropdown updated with', doctors.length, 'doctors (fallback)');
+                    return;
+                }
+
                 jadwalSelect.innerHTML = '<option value="">-- Pilih Jadwal --</option>';
                 jadwalSelect.disabled = true;
                 console.log('[JADWAL DEBUG] No jadwal found via AJAX for poli', poliId);
@@ -194,7 +207,8 @@ document.getElementById('poliklinik').addEventListener('change', loadJadwal);
 
 // Sisipkan data jadwal server-side ke JS (fallback)
 window.serverJadwals = {!! isset($jadwals) ? json_encode($jadwals) : '{}' !!};
-console.log('[JADWAL DEBUG] Page loaded. serverJadwals:', window.serverJadwals);
+window.serverDokters = {!! isset($doctors) ? json_encode($doctors) : '{}' !!};
+console.log('[JADWAL DEBUG] Page loaded. serverJadwals:', window.serverJadwals, 'serverDokters:', window.serverDokters);
 
 // Populate jadwal dropdown on page load if a poli is already selected
 document.addEventListener('DOMContentLoaded', function() {

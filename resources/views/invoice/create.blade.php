@@ -81,11 +81,74 @@
             </select>
         </div>
 
+        <div class="mb-3" id="no-bpjs-group" style="display:none;">
+            <label>No. BPJS / Nomor Asuransi</label>
+            <input type="text" name="no_bpjs" id="no_bpjs" class="form-control" placeholder="Masukkan nomor BPJS atau polis asuransi jika ada">
+            <small class="text-muted">BPJS: 13 digit | Asuransi: minimal 6 karakter</small>
+            <div id="no-bpjs-error" class="text-danger" style="display:none; font-size:12px; margin-top:4px;"></div>
+        </div>
+
         <input type="hidden" name="layanan" value="{{ $rekam->layanan }}">
 
         <button type="submit" class="btn btn-primary">Buat Invoice</button>
         <a href="{{ route('rekam.show', $rekam->id) }}" class="btn btn-secondary">Batal</a>
     </form>
+
+<script>
+    (function(){
+        const jenis = document.querySelector('select[name="jenis_pembayaran"]');
+        const group = document.getElementById('no-bpjs-group');
+        const input = document.getElementById('no_bpjs');
+        const errDiv = document.getElementById('no-bpjs-error');
+        const form = document.querySelector('form');
+        
+        function validateNumber() {
+            const val = input.value.trim();
+            const method = jenis.value;
+            errDiv.style.display = 'none';
+            errDiv.textContent = '';
+            
+            if (method === 'BPJS') {
+                if (!/^\d{13}$/.test(val)) {
+                    errDiv.textContent = 'Nomor BPJS harus tepat 13 digit angka';
+                    errDiv.style.display = 'block';
+                    return false;
+                }
+            } else if (method === 'Asuransi') {
+                if (!/^[a-zA-Z0-9]{6,}$/.test(val)) {
+                    errDiv.textContent = 'Nomor Asuransi minimal 6 karakter (huruf/angka)';
+                    errDiv.style.display = 'block';
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function toggle() {
+            if (!jenis) return;
+            if (jenis.value === 'BPJS' || jenis.value === 'Asuransi') {
+                group.style.display = 'block';
+                input.required = true;
+            } else {
+                group.style.display = 'none';
+                input.required = false;
+                errDiv.style.display = 'none';
+            }
+        }
+        
+        jenis && jenis.addEventListener('change', toggle);
+        input && input.addEventListener('blur', validateNumber);
+        input && input.addEventListener('keyup', validateNumber);
+        
+        form && form.addEventListener('submit', (e) => {
+            if ((jenis.value === 'BPJS' || jenis.value === 'Asuransi') && !validateNumber()) {
+                e.preventDefault();
+            }
+        });
+        
+        toggle();
+    })();
+</script>
 
 </div>
 

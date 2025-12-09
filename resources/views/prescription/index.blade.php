@@ -50,8 +50,8 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ data_get(optional(optional(optional($prescription->rekam)->pendaftaran)->pasien), 'no_rm') ?? data_get(optional(optional(optional($prescription->rekam)->pendaftaran)->pasien), 'kodepasien') ?? '-' }}</td>
                     <td>{{ optional(optional(optional($prescription->rekam)->pendaftaran)->pasien)->nama ?? '-' }}</td>
-                    <td>{{ optional(optional($prescription->rekam)->pendaftaran)->poliklinik->name ?? '-' }}</td>
-                    <td>{{ optional($prescription)->dokter->nama ?? '-' }}</td>
+                    <td>{{ data_get($prescription, 'rekam.pendaftaran.poliklinik.name', '-') }}</td>
+                    <td>{{ data_get($prescription, 'dokter.nama') ?? data_get($prescription, 'rekam.dokter.nama', '-') }}</td>
                     <td>
                         <span class="badge bg-primary">
                             {{ $prescription->items->count() }} item
@@ -73,9 +73,17 @@
                     </td>
                     <td>{{ $prescription->created_at->format('d/m/Y H:i') }}</td>
                     <td>
-                        <a href="{{ route('prescription.show', $prescription->id) }}" class="btn btn-sm btn-info">
+                        <a href="{{ route('prescription.show', $prescription->id) }}" class="btn btn-sm btn-info" title="Lihat Detail">
                             <i class="bi bi-eye"></i> Lihat
                         </a>
+                        @if($prescription->status === 'Pending')
+                            <a href="{{ route('prescription.edit', $prescription->id) }}" class="btn btn-sm btn-warning" title="Edit Resep">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $prescription->id }}" title="Hapus Resep">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        @endif
                     </td>
                 </tr>
             @empty
@@ -90,5 +98,33 @@
         {{ $prescriptions->links() }}
     </div>
 </div>
+
+<!-- Delete Modals -->
+@foreach($prescriptions as $prescription)
+    @if($prescription->status === 'Pending')
+        <div class="modal fade" id="deleteModal{{ $prescription->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Konfirmasi Hapus Resep</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin menghapus resep untuk <strong>{{ optional(optional(optional($prescription->rekam)->pendaftaran)->pasien)->nama ?? '-' }}</strong>?</p>
+                        <p class="text-muted small">Aksi ini tidak dapat dibatalkan.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <form action="{{ route('prescription.destroy', $prescription->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Hapus Resep</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
 
 @endsection

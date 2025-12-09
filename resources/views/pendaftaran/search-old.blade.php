@@ -13,105 +13,57 @@
 
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="input-group input-group-lg mb-3">
-                        <input type="text" id="searchInput" class="form-control" 
-                               placeholder="Masukkan No RM..." 
-                               autocomplete="off" list="noRmSuggestions">
-                        <datalist id="noRmSuggestions"></datalist>
-                        <button class="btn btn-primary" type="button" id="searchBtn">
-                            <i class="bi bi-search"></i> Cari
-                        </button>
-                    </div>
+                    <form method="GET" action="{{ route('pendaftaran.search-old-patient') }}" class="row g-3">
+                        <div class="col-md-5">
+                            <label for="searchBox" class="form-label">Cari berdasarkan No RM atau Nama</label>
+                            <input type="text" class="form-control" id="searchBox" name="q" placeholder="Masukkan No RM atau Nama Pasien">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Cari
+                            </button>
+                        </div>
+                    </form>
+
+                    @if(isset($results) && count($results) > 0)
+                        <div class="table-responsive mt-4">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>No RM</th>
+                                        <th>Nama</th>
+                                        <th>NIK</th>
+                                        <th>Tanggal Lahir</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($results as $pasien)
+                                        <tr>
+                                            <td><strong>{{ $pasien->no_rm }}</strong></td>
+                                            <td>{{ $pasien->nama }}</td>
+                                            <td>{{ $pasien->nik ?? '-' }}</td>
+                                            <td>{{ $pasien->tanggal_lahir ?? '-' }}</td>
+                                            <td>
+                                                <a href="{{ route('pendaftaran.select-poli', $pasien->id) }}" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-arrow-right"></i> Pilih
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @elseif(isset($q) && $q !== '')
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle"></i> Pasien tidak ditemukan. 
+                            <a href="{{ route('pendaftaran.create-new-patient') }}" class="alert-link">Daftarkan pasien baru?</a>
+                        </div>
+                    @endif
                 </div>
             </div>
-
-            <!-- Result -->
-            <div id="searchResult"></div>
         </div>
-
-        <script>
-        // Combined JS: suggestions + search by exact No RM
-        const input = document.getElementById('searchInput');
-        const btn = document.getElementById('searchBtn');
-        const resultWrap = document.getElementById('searchResult');
-
-        input.addEventListener('input', function() {
-            const val = this.value.trim();
-            if(val.length < 2) return;
-            fetch(`/api/pasien/suggest-no-rm?q=${encodeURIComponent(val)}`)
-                .then(res => res.json())
-                .then(data => {
-                    const datalist = document.getElementById('noRmSuggestions');
-                    datalist.innerHTML = '';
-                    data.forEach(no_rm => {
-                        const option = document.createElement('option');
-                        option.value = no_rm;
-                        datalist.appendChild(option);
-                    });
-                })
-                .catch(() => {});
-        });
-
-        function renderNotFound() {
-            resultWrap.innerHTML = `\n        <div class="alert alert-info">\n            Pasien tidak ditemukan. <a href="{{ route('pendaftaran.create-new-patient') }}">Daftar pasien baru?</a>\n        </div>\n    `;
-        }
-
-        function renderError(err) {
-            resultWrap.innerHTML = '<div class="alert alert-danger">Error: ' + err + '</div>';
-        }
-
-        function renderPatientCard(p) {
-            let html = `<div class="card"><div class="card-body">\n                <h6 class="card-title">${p.nama}</h6>\n                <p class="card-text text-muted mb-2">\n                    <small>\n                        <strong>No RM:</strong> ${p.no_rm}<br>\n                        <strong>NIK:</strong> ${p.nik || '-'}<br>\n                        <strong>DOB:</strong> ${p.tanggal_lahir || '-'}\n                    </small>\n                </p>\n                <button class="btn btn-success" onclick="selectPasien(${p.id})">Pilih Pasien</button>\n            </div></div>`;
-            resultWrap.innerHTML = html;
-        }
-
-        function searchPasienByList() {
-            const query = input.value.trim();
-            if(!query) {
-                resultWrap.innerHTML = '<div class="alert alert-warning">Masukkan No RM</div>';
-                return;
-            }
-            // exact lookup endpoint
-            fetch(`/api/patient/${encodeURIComponent(query)}`)
-                .then(res => {
-                    if(res.status === 404) return null;
-                    return res.json();
-                })
-                .then(p => {
-                    if(!p || !p.no_rm) {
-                        renderNotFound();
-                        return;
-                    }
-                    renderPatientCard(p);
-                })
-                .catch(renderError);
-        }
-
-        btn.addEventListener('click', searchPasienByList);
-        input.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                searchPasienByList();
-            }
-        });
-
-        function selectPasien(pasienId) {
-            window.location.href = `/pendaftaran/select-poli/${pasienId}`;
-        }
-        </script>
-
-<style>
-.card {
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.card:hover {
-    border-color: #667eea;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-    transform: translateY(-2px);
-}
-</style>
+    </div>
+</div>
 
 @endsection

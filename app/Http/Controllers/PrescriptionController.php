@@ -132,7 +132,8 @@ class PrescriptionController extends Controller
     public function index()
     {
         $this->checkApotekerAccess();
-        $prescriptions = Prescription::with('rekam.pasien', 'dokter')
+        // eager load rekam -> pasien and rekam -> dokter and rekam->pendaftaran->poliklinik to avoid N+1
+        $prescriptions = Prescription::with(['rekam.pasien', 'rekam.dokter', 'rekam.pendaftaran.poliklinik', 'dokter'])
             ->orderBy('created_at', 'DESC')
             ->paginate(15);
         
@@ -145,7 +146,8 @@ class PrescriptionController extends Controller
     public function pending()
     {
         $this->checkApotekerAccess();
-        $prescriptions = Prescription::with('items.obat', 'rekam.pasien', 'dokter')
+        // ensure rekam.dokter and rekam.pendaftaran.poliklinik also loaded
+        $prescriptions = Prescription::with(['items.obat', 'rekam.pasien', 'rekam.dokter', 'rekam.pendaftaran.poliklinik', 'dokter'])
             ->where('status', 'Pending')
             ->orderBy('created_at', 'ASC')
             ->paginate(15);
@@ -380,5 +382,117 @@ class PrescriptionController extends Controller
         }
 
         return $invoice;
+    }
+
+    /**
+     * Show edit form for a prescription
+     */
+    public function edit($prescriptionId)
+    {
+        $this->checkDokterAccess();
+        $prescription = Prescription::with('items.obat', 'rekam')->findOrFail($prescriptionId);
+        $obat = Obat::all();
+        
+        return view('prescription.edit', compact('prescription', 'obat'));
+    }
+
+    /**
+     * Update prescription with items
+     */
+    public function update($prescriptionId, Request $request)
+    {
+        $this->checkDokterAccess();
+        $prescription = Prescription::with('items')->findOrFail($prescriptionId);
+
+        // Only allow edit if status is still Pending
+        if ($prescription->status !== 'Pending') {
+            return redirect()->route('prescription.index')
+                ->with('error', 'Hanya resep dengan status Pending yang dapat diubah');
+        }
+
+        $validated = $request->validate([
+            'obat_items' => 'required|array|min:1',
+            'obat_items.*.obat_id' => 'required|exists:obats,id',
+            'obat_items.*.dosis' => 'required|string',
+            'obat_items.*.jumlah' => 'required|integer|min:1',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Delete existing items
+            $prescription->items()->delete();
+
+            // Create new items
+            $totalHarga = 0;
+            foreach ($validated['obat_items'] as $item) {
+                $obat = Obat::find($item['obat_id']);
+                
+                if (!$obat) {
+                    throw new \Exception('Obat tidak ditemukan');
+                }
+
+                $subtotal = ($obat->harga ?? 0) * $item['jumlah'];
+                $totalHarga += $subtotal;
+
+                PrescriptionItem::create([
+                    'prescription_id' => $prescription->id,
+                    'obat_id' => $item['obat_id'],
+                    'jumlah' => $item['jumlah'],
+                    'dosis' => $item['dosis'],
+                    'harga_satuan' => $obat->harga ?? 0,
+                    'subtotal' => $subtotal
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('prescription.index')
+                ->with('success', 'Resep berhasil diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memperbarui resep: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete a prescription
+     */
+    public function destroy($prescriptionId)
+    {
+        $this->checkDokterAccess();
+        $prescription = Prescription::findOrFail($prescriptionId);
+
+        // Only allow delete if status is still Pending
+        if ($prescription->status !== 'Pending') {
+            return redirect()->route('prescription.index')
+                ->with('error', 'Hanya resep dengan status Pending yang dapat dihapus');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Delete items
+            $prescription->items()->delete();
+
+            // Delete prescription
+            $prescription->delete();
+
+            // Update Rekam status
+            if ($prescription->rekam) {
+                $prescription->rekam->update([
+                    'resep_status' => null,
+                    'resep_catatan' => null
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('prescription.index')
+                ->with('success', 'Resep berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus resep: ' . $e->getMessage());
+        }
     }
 }

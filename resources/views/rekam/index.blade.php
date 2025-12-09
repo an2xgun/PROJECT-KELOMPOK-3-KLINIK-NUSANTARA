@@ -46,7 +46,17 @@
                         <td>{{ optional($r->pasien)->nama ?? '-' }}</td>
                         <td>{{ substr(optional($r)->keluhan ?? '-', 0, 30) }}{{ (optional($r)->keluhan) ? '...' : '' }}</td>
                         <td>{{ optional($r->dokter)->nama ?? '-' }}</td>
-                        <td>{{ $r->diagnosa ?? ($r->diagnosa_primer ?? '-') }}</td>
+                        <td>
+                            @if($r->diagnosa)
+                                {{ $r->diagnosa }}
+                            @elseif(optional($r->diagnosaPrimer)->nama)
+                                {{ optional($r->diagnosaPrimer)->nama }}
+                            @elseif($r->diagnosa_primer)
+                                ID: {{ $r->diagnosa_primer }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $r->tanggalperiksa ?? '-' }}</td>
                         <td>
                             <a href="{{ route('rekam.show', $r->id) }}" class="btn btn-sm btn-info">Lihat</a>

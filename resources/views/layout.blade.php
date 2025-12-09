@@ -393,7 +393,7 @@
     <span>Pendaftaran Baru</span>
   </a>
   <a href="{{ route('pendaftaran.list') }}" class="{{ request()->is('pendaftaran/list*') ? 'active' : '' }}">
-    <i class="bi bi-list-check"></i>
+    <i class="bi bi-list-check"></i> 
     <span>Daftar Antrian</span>
   </a>
   @endif
@@ -404,17 +404,11 @@
   <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
   <div class="sidebar-title"><i class="bi bi-stethoscope"></i> Pemeriksaan Medis</div>
   @endif
-  @if(Auth::user()->role === 'dokter')
+  <!-- Tampilkan antrian pemeriksaan langsung ke route dokter untuk admin dan dokter -->
   <a href="{{ route('examination.queue') }}" class="{{ request()->is('examination/queue*') ? 'active' : '' }}">
     <i class="bi bi-hourglass-split"></i>
     <span>Antrian Pemeriksaan</span>
   </a>
-  @else
-  <a href="{{ route('pendaftaran.list') }}" class="{{ request()->is('pendaftaran/list*') ? 'active' : '' }}">
-    <i class="bi bi-hourglass-split"></i>
-    <span>Antrian Pemeriksaan</span>
-  </a>
-  @endif
   <a href="{{ route('rekam.index') }}" class="{{ request()->is('rekam*') ? 'active' : '' }}">
     <i class="bi bi-file-text"></i>
     <span>Rekam Medis</span>
@@ -461,6 +455,10 @@
 
   <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
   <div class="sidebar-title"><i class="bi bi-receipt"></i> Keuangan</div>
+  <a href="{{ route('pendaftaran.antrian') }}" class="{{ request()->is('pendaftaran/antrian*') ? 'active' : '' }}">
+    <i class="bi bi-hourglass-split"></i>
+    <span>Antrian Pasien</span>
+  </a>
   <a href="{{ route('invoice.index') }}" class="{{ request()->is('invoice*') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-pdf"></i>
     <span>Kasir</span>
@@ -488,6 +486,10 @@
   @if(Auth::user()->role === 'kasir' && Auth::user()->role !== 'admin')
   <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
   <div class="sidebar-title"><i class="bi bi-cash-coin"></i> Pembayaran</div>
+  <a href="{{ route('pendaftaran.antrian') }}" class="{{ request()->is('pendaftaran/antrian*') ? 'active' : '' }}">
+    <i class="bi bi-hourglass-split"></i>
+    <span>Antrian Pasien</span>
+  </a>
   <a href="{{ route('invoice.index') }}" class="{{ request()->is('invoice*') ? 'active' : '' }}">
     <i class="bi bi-file-earmark-pdf"></i>
     <span>Daftar Invoice</span>
@@ -501,7 +503,7 @@
   <i class="bi bi-chevron-left"></i>
 </button>
 
-@if(Auth::check() && Auth::user()->role === 'dokter')
+@if(Auth::check() && (Auth::user()->role === 'dokter' || Auth::user()->role === 'admin'))
   <a href="{{ route('examination.queue') }}" class="btn btn-primary float-exam-btn" title="Mulai Pemeriksaan" id="floatExamBtn">
     <i class="bi bi-stethoscope" style="font-size:18px;"></i>
     <span style="color:white;">Mulai Pemeriksaan</span>

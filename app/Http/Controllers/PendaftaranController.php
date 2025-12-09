@@ -22,9 +22,21 @@ class PendaftaranController extends Controller
     }
 
     // Halaman cari pasien lama
-    public function searchOld()
+    public function searchOld(Request $request)
     {
-        return view('pendaftaran.search-old');
+        $q = $request->query('q', '');
+        $results = [];
+
+        if ($q !== '') {
+            // Cari pasien berdasarkan no_rm atau nama
+            $results = Pasien::where(function($query) use ($q) {
+                $query->where('no_rm', 'like', '%' . $q . '%')
+                      ->orWhere('nama', 'like', '%' . $q . '%')
+                      ->orWhere('nik', 'like', '%' . $q . '%');
+            })->get();
+        }
+
+        return view('pendaftaran.search-old', compact('results', 'q'));
     }
 
     // Halaman input pasien baru
@@ -88,12 +100,40 @@ class PendaftaranController extends Controller
                 return [(string)$key => $items];
             })->toArray();
 
-        return view('pendaftaran.select-poli', compact('pasien', 'polikliniks', 'jadwals'));
+        // Also provide doctors grouped by poliklinik as fallback (useful when no jadwal exists)
+        $doctors = \App\Models\Dokter::all()->groupBy('poliklinik_id')->map(function($group) {
+            return $group->map(function($d) {
+                return ['id' => $d->id, 'nama' => $d->nama];
+            })->values()->toArray();
+        })->toArray();
+
+        return view('pendaftaran.select-poli', compact('pasien', 'polikliniks', 'jadwals', 'doctors'));
     }
 
     // Simpan pendaftaran poli dan buat rekam medis
     public function storePoli(Request $request, Pasien $pasien)
     {
+        // Handle the case where the front-end sends a sentinel value like "dokter-<id>"
+        // meaning the user selected a doctor without an existing jadwal. We will
+        // create a default JadwalPoli entry on-the-fly and continue with normal flow.
+        if ($request->has('jadwal_poli_id') && is_string($request->jadwal_poli_id) && str_starts_with($request->jadwal_poli_id, 'dokter-')) {
+            $parts = explode('-', $request->jadwal_poli_id);
+            $dokterId = intval($parts[1] ?? 0);
+            if ($dokterId > 0) {
+                // create a default jadwal (user can edit later in master jadwal)
+                $jadwal = JadwalPoli::create([
+                    'poliklinik_id' => $request->poliklinik_id,
+                    'dokter_id' => $dokterId,
+                    'hari' => 'Senin',
+                    'jam_mulai' => '09:00:00',
+                    'jam_selesai' => '17:00:00',
+                ]);
+
+                // replace request value so validation succeeds
+                $request->merge(['jadwal_poli_id' => $jadwal->id]);
+            }
+        }
+
         $validated = $request->validate([
             'poliklinik_id' => 'required|exists:polikliniks,id',
             'jadwal_poli_id' => 'required|exists:jadwal_polis,id',
@@ -137,6 +177,23 @@ class PendaftaranController extends Controller
             ->paginate(15);
         
         return view('pendaftaran.index', compact('pendaftaran'));
+    }
+
+    // Antrian (untuk kasir/admin)
+    public function antrian()
+    {
+        $today = now()->toDateString();
+        $pendaftarans = Pendaftaran::with('pasien', 'poliklinik')
+            ->whereDate('created_at', $today)
+            ->orderBy('nomor_antrian', 'ASC')
+            ->paginate(15);
+
+        $statsWaiting = Pendaftaran::where('status_layanan', 'Menunggu')->whereDate('created_at', $today)->count();
+        $statsServing = Pendaftaran::where('status_layanan', 'Sedang Dilayani')->whereDate('created_at', $today)->count();
+        $statsCompleted = Pendaftaran::where('status_layanan', 'Selesai')->whereDate('created_at', $today)->count();
+        $statsTotal = $statsWaiting + $statsServing + $statsCompleted;
+
+        return view('pendaftaran.antrian', compact('pendaftarans', 'statsWaiting', 'statsServing', 'statsCompleted', 'statsTotal'));
     }
 
     // Tandai sebagai sedang dilayani

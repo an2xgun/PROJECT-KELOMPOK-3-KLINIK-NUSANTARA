@@ -124,6 +124,119 @@
                             {{ $statusText }}
                         </p>
                     </div>
+                    @if($invoice->status === 'unpaid')
+                    <div class="mb-3">
+                        <form action="{{ route('invoice.markAsPaid', $invoice->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="mb-2">
+                                <label class="form-label">Pilih Cara Pembayaran</label>
+                                <select name="payment_method" id="payment_method" class="form-select" required>
+                                    <option value="Tunai">Tunai</option>
+                                    <option value="BPJS">BPJS</option>
+                                    <option value="Asuransi">Asuransi</option>
+                                    <option value="Transfer">Transfer</option>
+                                </select>
+                            </div>
+                            <div class="mb-2" id="pay-no-bpjs" style="display:none;">
+                                <label class="form-label">No. BPJS / Polis Asuransi</label>
+                                <input type="text" name="no_bpjs" id="pay_no_bpjs" class="form-control">
+                                <small class="text-muted" id="pay-bpjs-hint">BPJS: 13 digit | Asuransi: minimal 6 karakter</small>
+                                <div id="pay-bpjs-error" class="text-danger" style="display:none; font-size:12px; margin-top:4px;"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Keterangan (opsional)</label>
+                                <input type="text" name="keterangan" class="form-control" placeholder="Catatan pembayaran atau bukti transfer">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">Proses Pembayaran</button>
+                                <a href="{{ route('invoice.print', $invoice->id) }}" target="_blank" class="btn btn-outline-primary">Cetak Struk</a>
+                            </div>
+                        </form>
+                    </div>
+                    <script>
+                        (function(){
+                            const sel = document.getElementById('payment_method');
+                            const grp = document.getElementById('pay-no-bpjs');
+                            const inp = document.getElementById('pay_no_bpjs');
+                            const errDiv = document.getElementById('pay-bpjs-error');
+                            const form = grp.closest('form');
+                            
+                            function validatePaymentNumber() {
+                                const val = inp.value.trim();
+                                const method = sel.value;
+                                errDiv.style.display = 'none';
+                                errDiv.textContent = '';
+                                
+                                if (method === 'BPJS') {
+                                    if (!/^\d{13}$/.test(val)) {
+                                        errDiv.textContent = 'Nomor BPJS harus tepat 13 digit angka';
+                                        errDiv.style.display = 'block';
+                                        return false;
+                                    }
+                                } else if (method === 'Asuransi') {
+                                    if (!/^[a-zA-Z0-9]{6,}$/.test(val)) {
+                                        errDiv.textContent = 'Nomor Asuransi minimal 6 karakter (huruf/angka)';
+                                        errDiv.style.display = 'block';
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            }
+                            
+                            function toggle(){
+                                if(!sel) return;
+                                if(sel.value === 'BPJS' || sel.value === 'Asuransi'){
+                                    grp.style.display = 'block'; inp.required = true;
+                                } else { 
+                                    grp.style.display = 'none'; 
+                                    inp.required = false; 
+                                    errDiv.style.display = 'none';
+                                }
+                            }
+                            sel && sel.addEventListener('change', toggle);
+                            inp && inp.addEventListener('blur', validatePaymentNumber);
+                            inp && inp.addEventListener('keyup', validatePaymentNumber);
+                            
+                            form && form.addEventListener('submit', (e) => {
+                                if ((sel.value === 'BPJS' || sel.value === 'Asuransi') && !validatePaymentNumber()) {
+                                    e.preventDefault();
+                                }
+                            });
+                            
+                            toggle();
+                        })();
+                    </script>
+                    @else
+                        <div class="mb-3 text-center">
+                            <a href="{{ route('invoice.print', $invoice->id) }}" target="_blank" class="btn btn-outline-primary">Cetak Struk</a>
+                            <a href="{{ route('invoice.printThermal', $invoice->id) }}" target="_blank" class="btn btn-outline-secondary ms-2">Cetak (Thermal)</a>
+                        </div>
+                    @endif
+
+                    @if($invoice->payments && $invoice->payments->count() > 0)
+                        <hr>
+                        <h6>Riwayat Pembayaran</h6>
+                        <ul class="list-group mt-2">
+                            @foreach($invoice->payments as $p)
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ strtoupper($p->method) }}</strong>
+                                        @if($p->no_bpjs)
+                                            <div><small>No: {{ $p->no_bpjs }}</small></div>
+                                        @endif
+                                        @if($p->note)
+                                            <div><small>{{ $p->note }}</small></div>
+                                        @endif
+                                    </div>
+                                    <div class="text-end">
+                                        <div>Rp {{ number_format($p->amount,0,',','.') }}</div>
+                                        <div><small>{{ $p->paid_at ? $p->paid_at->format('d/m/Y H:i') : $p->created_at->format('d/m/Y H:i') }}</small></div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
             </div>
         </div>

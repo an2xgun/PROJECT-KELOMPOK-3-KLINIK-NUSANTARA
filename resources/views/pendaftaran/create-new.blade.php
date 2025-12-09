@@ -22,8 +22,8 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Lengkap *</label>
-                                <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror" 
-                                       value="{{ old('nama') }}" required>
+                                    <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror" 
+                                        value="{{ old('nama', request()->query('prefill_name')) }}" required>
                                 @error('nama') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
 
