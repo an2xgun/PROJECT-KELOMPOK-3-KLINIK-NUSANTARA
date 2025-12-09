@@ -75,13 +75,23 @@ class InvoiceController extends Controller
 
         $rekam = Rekam::findOrFail($rekam_id);
         
-        // Filter only items that were included (checkbox "include" present)
+        // Filter items yang memiliki checkbox include yang di-check
+        // Jika tidak ada checkbox include field, berarti semua item yang dikirim harus ditambahkan
         $toBill = [];
+        $hasIncludeField = false;
+        
         foreach ($validated['items'] as $item) {
-            // some items from the form may include an 'include' flag when checked
-            if (array_key_exists('include', $item) && $item['include']) {
+            // Cek apakah ada field 'include' di request raw
+            $itemIndex = array_search($item, $validated['items']);
+            if (isset($request->input('items')[$itemIndex]['include'])) {
+                $hasIncludeField = true;
                 $toBill[] = $item;
             }
+        }
+        
+        // Jika tidak ada field include sama sekali, gunakan semua items
+        if (!$hasIncludeField) {
+            $toBill = $validated['items'];
         }
 
         if (count($toBill) === 0) {

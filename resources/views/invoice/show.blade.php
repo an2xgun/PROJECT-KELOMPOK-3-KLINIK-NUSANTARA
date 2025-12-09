@@ -64,35 +64,98 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h5>Detail Pembayaran</h5>
+                    <h5>Rincian Biaya Layanan</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Deskripsi</th>
-                                <th>Tipe</th>
-                                <th class="text-end">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($invoice->items as $item)
-                            <tr>
-                                <td>{{ $item->name }}</td>
-                                <td>{{ $item->type }}</td>
-                                <td class="text-end">Rp {{ number_format($item->amount, 0, ',', '.') }}</td>
-                            </tr>
-                            @endforeach
-                            <tr class="table-light">
-                                <td colspan="2" class="text-end"><strong>Subtotal:</strong></td>
-                                <td class="text-end"><strong>Rp {{ number_format($invoice->subtotal, 0, ',', '.') }}</strong></td>
-                            </tr>
-                            <tr class="table-light">
-                                <td colspan="2" class="text-end"><strong>Total:</strong></td>
-                                <td class="text-end"><strong>Rp {{ number_format($invoice->total, 0, ',', '.') }}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th>Item Layanan</th>
+                                    <th class="text-center">Tipe</th>
+                                    <th class="text-end">Harga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($invoice->items && count($invoice->items) > 0)
+                                    @php
+                                        $pemeriksaan = $invoice->items->filter(fn($i) => $i->type === 'pemeriksaan');
+                                        $tindakan = $invoice->items->filter(fn($i) => $i->type === 'layanan' || $i->type === 'tindakan');
+                                        $obat = $invoice->items->filter(fn($i) => $i->type === 'obat');
+                                    @endphp
+                                    
+                                    @if($pemeriksaan->count() > 0)
+                                        <tr style="background: #e7f3ff; font-weight: 600;">
+                                            <td colspan="3"><i class="bi bi-stethoscope"></i> Pemeriksaan</td>
+                                        </tr>
+                                        @foreach($pemeriksaan as $item)
+                                            <tr>
+                                                <td>{{ $item->name }}</td>
+                                                <td class="text-center"><span class="badge bg-primary">Pemeriksaan</span></td>
+                                                <td class="text-end">Rp {{ number_format($item->amount, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+
+                                    @if($tindakan->count() > 0)
+                                        <tr style="background: #fff3cd; font-weight: 600;">
+                                            <td colspan="3"><i class="bi bi-tools"></i> Tindakan Medis</td>
+                                        </tr>
+                                        @foreach($tindakan as $item)
+                                            <tr>
+                                                <td>{{ $item->name }}</td>
+                                                <td class="text-center"><span class="badge bg-warning text-dark">Tindakan</span></td>
+                                                <td class="text-end">Rp {{ number_format($item->amount, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+
+                                    @if($obat->count() > 0)
+                                        <tr style="background: #f0f9e8; font-weight: 600;">
+                                            <td colspan="3"><i class="bi bi-capsule"></i> Obat & Resep</td>
+                                        </tr>
+                                        @foreach($obat as $item)
+                                            <tr>
+                                                <td>{{ $item->name }}</td>
+                                                <td class="text-center"><span class="badge bg-success">Obat</span></td>
+                                                <td class="text-end">Rp {{ number_format($item->amount, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+
+                                    @php
+                                        $lainnya = $invoice->items->filter(fn($i) => !in_array($i->type, ['pemeriksaan', 'layanan', 'tindakan', 'obat']));
+                                    @endphp
+                                    @if($lainnya->count() > 0)
+                                        <tr style="background: #f5f5f5; font-weight: 600;">
+                                            <td colspan="3"><i class="bi bi-info-circle"></i> Lainnya</td>
+                                        </tr>
+                                        @foreach($lainnya as $item)
+                                            <tr>
+                                                <td>{{ $item->name }}</td>
+                                                <td class="text-center"><span class="badge bg-secondary">{{ ucfirst($item->type) }}</span></td>
+                                                <td class="text-end">Rp {{ number_format($item->amount, 0, ',', '.') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">
+                                            <i class="bi bi-inbox"></i> Tidak ada detail item
+                                        </td>
+                                    </tr>
+                                @endif
+                                <tr style="border-top: 2px solid #ddd;">
+                                    <td colspan="2" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end"><strong>Rp {{ number_format($invoice->subtotal ?? 0, 0, ',', '.') }}</strong></td>
+                                </tr>
+                                <tr style="background: #e3f2fd;">
+                                    <td colspan="2" class="text-end"><strong style="font-size: 16px;">Total Biaya:</strong></td>
+                                    <td class="text-end"><strong style="font-size: 16px; color: #667eea;">Rp {{ number_format($invoice->total ?? 0, 0, ',', '.') }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

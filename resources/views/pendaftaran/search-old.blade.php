@@ -43,7 +43,7 @@
                                             <td><strong>{{ $pasien->no_rm }}</strong></td>
                                             <td>{{ $pasien->nama }}</td>
                                             <td>{{ $pasien->nik ?? '-' }}</td>
-                                            <td>{{ $pasien->tanggal_lahir ?? '-' }}</td>
+                                            <td>{{ $pasien->tanggal_lahir ?? $pasien->lahir ?? '-' }}</td>
                                             <td>
                                                 <a href="{{ route('pendaftaran.select-poli', $pasien->id) }}" class="btn btn-sm btn-success">
                                                     <i class="bi bi-arrow-right"></i> Pilih

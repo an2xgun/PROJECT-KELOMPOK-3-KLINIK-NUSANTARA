@@ -405,9 +405,12 @@
   <div class="sidebar-title"><i class="bi bi-stethoscope"></i> Pemeriksaan Medis</div>
   @endif
   <!-- Tampilkan antrian pemeriksaan langsung ke route dokter untuk admin dan dokter -->
-  <a href="{{ route('examination.queue') }}" class="{{ request()->is('examination/queue*') ? 'active' : '' }}">
-    <i class="bi bi-hourglass-split"></i>
-    <span>Antrian Pemeriksaan</span>
+  <a href="{{ route('examination.queue') }}" class="{{ request()->is('examination/queue*') ? 'active' : '' }}" style="display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <i class="bi bi-hourglass-split"></i>
+      <span>Antrian Pemeriksaan</span>
+    </div>
+    <span id="pending-count-badge-sidebar" class="badge bg-danger" style="display: none; font-size: 11px; padding: 4px 8px;">0</span>
   </a>
   <a href="{{ route('rekam.index') }}" class="{{ request()->is('rekam*') ? 'active' : '' }}">
     <i class="bi bi-file-text"></i>
@@ -507,7 +510,6 @@
   <a href="{{ route('examination.queue') }}" class="btn btn-primary float-exam-btn" title="Mulai Pemeriksaan" id="floatExamBtn">
     <i class="bi bi-stethoscope" style="font-size:18px;"></i>
     <span style="color:white;">Mulai Pemeriksaan</span>
-    <span id="pending-count-badge" class="badge bg-danger" style="margin-left:8px; display: none;">0</span>
   </a>
 @endif
 
@@ -619,9 +621,9 @@
     });
   })();
 
-  // Poll pending pendaftaran count for dokter float button
+  // Poll pending pendaftaran count untuk sidebar badge
   (function() {
-    const badge = document.getElementById('pending-count-badge');
+    const badge = document.getElementById('pending-count-badge-sidebar');
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     async function fetchCount() {
