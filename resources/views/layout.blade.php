@@ -577,7 +577,7 @@
     const root = document.documentElement;
     if (theme === 'day') {
       // Day: pink theme
-      root.style.setProperty('--primary-start', '#ffb6d5');
+      root.style.setProperty('--primary-start', '#cd6c94ff');
       root.style.setProperty('--primary-end', '#ff86c1');
       root.style.setProperty('--sidebar-bg', '#6b3346');
       root.style.setProperty('--bg-main', '#fff8fb');
