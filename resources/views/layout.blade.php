@@ -380,7 +380,7 @@
   <!-- Dashboard -->
   <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
     <i class="bi bi-speedometer2"></i>
-    <span>Dashboard</span>
+    <span>DASHBOARD</span>
   </a>
 
   <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
